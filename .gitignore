@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.env/
+
+# Database files
+*.db
+*.sqlite3
+
+# Configuration and key files
+*.env
+*.key
+*.salt
+*.password
+
+# Log files
+*.log
+
+# Build files
+*.spec
+build/
+dist/
+
+# User-specific files
+.DS_Store
+Thumbs.db 
