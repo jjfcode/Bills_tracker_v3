@@ -16,6 +16,7 @@ from .icon_utils import icon_manager, ICON_ADD, ICON_EDIT, ICON_DELETE, ICON_SAV
 from .validation import BillValidator, CategoryValidator, ValidationError, validate_field_in_real_time
 from .notification_dialog import NotificationManager
 from ..core.reminder_service import ReminderService
+from customtkinter import CTkComboBox
 
 BILLING_CYCLES = [
     "weekly", "bi-weekly", "monthly", "quarterly", "semi-annually", "annually", "one-time"
@@ -908,81 +909,100 @@ class MainWindow(ctk.CTk):
     def show_bills_view(self):
         self.clear_content()
         
-        # Configure grid for responsive layout
-        self.content.grid_rowconfigure(3, weight=1)  # Table row gets the weight
-        self.content.grid_columnconfigure(0, weight=1)
+        # Detect dark mode
+        dark_mode = is_dark_mode()
         
+        # Set colors based on mode
+        if dark_mode:
+            table_bg = "#23272e"
+            table_fg = "#f7f9fa"
+            table_alt_bg = "#2c313a"
+            table_header_bg = "#1f538d"
+            table_header_fg = "#ffffff"
+            button_bg = "#222831"
+            button_fg = "#f7f9fa"
+            entry_bg = "#23272e"
+            entry_fg = "#f7f9fa"
+            border_color = "#444"
+        else:
+            table_bg = BACKGROUND_COLOR
+            table_fg = TEXT_COLOR
+            table_alt_bg = "#f0f0f0"
+            table_header_bg = PRIMARY_COLOR
+            table_header_fg = "white"
+            button_bg = BACKGROUND_COLOR
+            button_fg = TEXT_COLOR
+            entry_bg = BACKGROUND_COLOR
+            entry_fg = TEXT_COLOR
+            border_color = "#ccc"
+
         # Button frame for Add, Export, Import with icons
-        btn_frame = ctk.CTkFrame(self.content, fg_color=BACKGROUND_COLOR)
+        btn_frame = ctk.CTkFrame(self.content, fg_color=button_bg, border_color=border_color, border_width=1)
         btn_frame.grid(row=0, column=0, sticky="ew", padx=SPACING_SM, pady=(0, SPACING_SM))
         btn_frame.grid_columnconfigure(3, weight=1)
         
         add_btn = icon_manager.get_button_with_icon(
             btn_frame, text=" Add Bill", icon_name=ICON_ADD, 
-            command=self.open_add_bill_dialog, fg_color=ACCENT_COLOR, text_color="white"
+            command=self.open_add_bill_dialog, fg_color=ACCENT_COLOR if not dark_mode else "#3a6ea5", text_color="white", height=36
         )
-        add_btn.grid(row=0, column=0, padx=(0, SPACING_SM), pady=SPACING_SM)
+        add_btn.grid(row=0, column=0, padx=(SPACING_SM, SPACING_SM), pady=SPACING_SM)
         
         export_btn = icon_manager.get_button_with_icon(
             btn_frame, text=" Export CSV", icon_name=ICON_EXPORT, 
-            command=self.export_bills, fg_color=SECONDARY_COLOR, text_color="white"
+            command=self.export_bills, fg_color=SECONDARY_COLOR if not dark_mode else "#2cba9f", text_color="white", height=36
         )
         export_btn.grid(row=0, column=1, padx=(0, SPACING_SM), pady=SPACING_SM)
         
         import_btn = icon_manager.get_button_with_icon(
             btn_frame, text=" Import CSV", icon_name=ICON_IMPORT, 
-            command=self.import_bills, fg_color=SECONDARY_COLOR, text_color="white"
+            command=self.import_bills, fg_color=SECONDARY_COLOR if not dark_mode else "#2cba9f", text_color="white", height=36
         )
         import_btn.grid(row=0, column=2, padx=(0, SPACING_SM), pady=SPACING_SM)
 
         # Filter options frame
-        filter_frame = ctk.CTkFrame(self.content)
+        filter_frame = ctk.CTkFrame(self.content, fg_color=button_bg, border_color=border_color, border_width=1)
         filter_frame.grid(row=1, column=0, sticky="ew", padx=SPACING_SM, pady=(0, SPACING_SM))
         filter_frame.grid_columnconfigure(1, weight=1)
         
-        # Status filter (Pending/Auto-Pay/Paid/All)
-        ctk.CTkLabel(filter_frame, text="Status:").grid(row=0, column=0, padx=(SPACING_SM, SPACING_SM), pady=SPACING_SM)
+        ctk.CTkLabel(filter_frame, text="Status:", text_color=button_fg).grid(row=0, column=0, padx=(SPACING_SM, SPACING_SM), pady=SPACING_SM)
         self.status_filter_var = ctk.StringVar(value="Pending")
-        status_combo = ttk.Combobox(filter_frame, textvariable=self.status_filter_var,
-                                   values=["Pending", "Auto-Pay", "Paid", "All"], state="readonly", width=12)
+        status_combo = CTkComboBox(filter_frame, variable=self.status_filter_var,
+                                   values=["Pending", "Auto-Pay", "Paid", "All"], width=120, fg_color=entry_bg, text_color=entry_fg, dropdown_fg_color=entry_bg, dropdown_text_color=entry_fg)
         status_combo.grid(row=0, column=1, padx=SPACING_SM, pady=SPACING_SM, sticky="w")
         status_combo.bind("<<ComboboxSelected>>", self.apply_filters)
         
-        # Period filter
-        ctk.CTkLabel(filter_frame, text="Period:").grid(row=0, column=2, padx=(SPACING_MD, SPACING_SM), pady=SPACING_SM)
+        ctk.CTkLabel(filter_frame, text="Period:", text_color=button_fg).grid(row=0, column=2, padx=(SPACING_MD, SPACING_SM), pady=SPACING_SM)
         self.period_filter_var = ctk.StringVar(value="All")
-        period_combo = ttk.Combobox(filter_frame, textvariable=self.period_filter_var,
-                                   values=["All", "This Month", "Last Month", "Previous Month", "Next Month", "This Year", "Last Year"], 
-                                   state="readonly", width=15)
+        period_combo = CTkComboBox(filter_frame, variable=self.period_filter_var,
+                                   values=["All", "This Month", "Last Month", "Previous Month", "Next Month", "This Year", "Last Year"], width=150, fg_color=entry_bg, text_color=entry_fg, dropdown_fg_color=entry_bg, dropdown_text_color=entry_fg)
         period_combo.grid(row=0, column=3, padx=SPACING_SM, pady=SPACING_SM)
         period_combo.bind("<<ComboboxSelected>>", self.apply_filters)
         
-        # Clear filters button
-        clear_btn = ctk.CTkButton(filter_frame, text="Clear All", command=self.clear_all_filters, width=80)
+        clear_btn = ctk.CTkButton(filter_frame, text="Clear All", command=self.clear_all_filters, width=80, fg_color=button_bg, text_color=button_fg, hover_color=SECONDARY_COLOR)
         clear_btn.grid(row=0, column=4, padx=SPACING_SM, pady=SPACING_SM)
 
         # Search bar
-        search_frame = ctk.CTkFrame(self.content)
+        search_frame = ctk.CTkFrame(self.content, fg_color=button_bg, border_color=border_color, border_width=1)
         search_frame.grid(row=2, column=0, sticky="ew", padx=SPACING_SM, pady=(0, SPACING_SM))
         search_frame.grid_columnconfigure(1, weight=1)
         
-        ctk.CTkLabel(search_frame, text="Search:").grid(row=0, column=0, padx=(SPACING_SM, SPACING_SM), pady=SPACING_SM)
+        ctk.CTkLabel(search_frame, text="Search:", text_color=button_fg).grid(row=0, column=0, padx=(SPACING_SM, SPACING_SM), pady=SPACING_SM)
         self.search_var = ctk.StringVar()
-        self.search_entry = ctk.CTkEntry(search_frame, textvariable=self.search_var)
+        self.search_entry = ctk.CTkEntry(search_frame, textvariable=self.search_var, fg_color=entry_bg, text_color=entry_fg, border_color=border_color)
         self.search_entry.grid(row=0, column=1, padx=SPACING_SM, pady=SPACING_SM, sticky="ew")
         self.search_var.trace("w", self.apply_filters)
         
         self.search_field_var = ctk.StringVar(value="Name")
-        search_field_combo = ttk.Combobox(search_frame, textvariable=self.search_field_var, 
-                                         values=["Name", "Due Date", "Category", "Status", "Paid", "Confirmation"], 
-                                         state="readonly", width=15)
+        search_field_combo = CTkComboBox(search_frame, variable=self.search_field_var,
+                                         values=["Name", "Due Date", "Category", "Status", "Paid", "Confirmation"], width=150, fg_color=entry_bg, text_color=entry_fg, dropdown_fg_color=entry_bg, dropdown_text_color=entry_fg)
         search_field_combo.grid(row=0, column=2, padx=SPACING_SM, pady=SPACING_SM)
+        search_field_combo.bind("<<ComboboxSelected>>", self.apply_filters)
         
-        clear_search_btn = ctk.CTkButton(search_frame, text="Clear Search", command=self.clear_search, width=100)
+        clear_search_btn = ctk.CTkButton(search_frame, text="Clear Search", command=self.clear_search, width=100, fg_color=button_bg, text_color=button_fg, hover_color=SECONDARY_COLOR)
         clear_search_btn.grid(row=0, column=3, padx=SPACING_SM, pady=SPACING_SM)
 
         self.bills_table_frame = ctk.CTkFrame(self.content)
-        self.bills_table_frame.grid(row=2, column=0, sticky="nswe")
+        self.bills_table_frame.grid(row=2, column=0, sticky="nswe", padx=SPACING_SM)
         self.bills_table_frame.grid_rowconfigure(0, weight=1)
         self.bills_table_frame.grid_columnconfigure(0, weight=1)
 
@@ -1069,49 +1089,47 @@ class MainWindow(ctk.CTk):
         # Now populate the table after the counter label is created
         self.populate_bills_table(self._filtered_bills)
         
-        # Edit, Delete, Apply, and Refresh buttons with icons
-        action_btn_frame = ctk.CTkFrame(self.content, fg_color=BACKGROUND_COLOR)
-        action_btn_frame.grid(row=4, column=0, sticky="ew", pady=(SPACING_SM, 0))
+        # --- Action Buttons (Edit, Delete, Bulk Delete, Apply, Refresh) ---
+        action_btn_frame = ctk.CTkFrame(self.content, fg_color=button_bg, border_color=border_color, border_width=1)
+        action_btn_frame.grid(row=4, column=0, sticky="ew", pady=(SPACING_SM, SPACING_SM))
         
         edit_btn = icon_manager.get_button_with_icon(
             action_btn_frame, text=" Edit", icon_name=ICON_EDIT, 
-            command=self.edit_selected_bill, fg_color=PRIMARY_COLOR, text_color="white"
+            command=self.edit_selected_bill, fg_color=PRIMARY_COLOR, text_color="white", height=36
         )
-        edit_btn.pack(side="left", padx=SPACING_SM)
+        edit_btn.pack(side="left", padx=SPACING_SM, pady=SPACING_SM)
         
         delete_btn = icon_manager.get_button_with_icon(
             action_btn_frame, text=" Delete", icon_name=ICON_DELETE, 
-            command=self.delete_selected_bill, fg_color=ERROR_COLOR, text_color="white"
+            command=self.delete_selected_bill, fg_color=ERROR_COLOR, text_color="white", height=36
         )
-        delete_btn.pack(side="left", padx=SPACING_SM)
+        delete_btn.pack(side="left", padx=SPACING_SM, pady=SPACING_SM)
         
         self.bulk_delete_btn = icon_manager.get_button_with_icon(
             action_btn_frame, text="Delete Selected", icon_name=ICON_DELETE, 
-            command=self.bulk_delete_selected_bills, fg_color=ERROR_COLOR, text_color="white", state="disabled"
+            command=self.bulk_delete_selected_bills, fg_color=ERROR_COLOR, text_color="white", state="disabled", height=36
         )
-        self.bulk_delete_btn.pack(side="left", padx=SPACING_SM)
+        self.bulk_delete_btn.pack(side="left", padx=SPACING_SM, pady=SPACING_SM)
         
         refresh_btn = icon_manager.get_button_with_icon(
             action_btn_frame, text=" Refresh", icon_name=ICON_REFRESH, 
-            command=self.refresh_bills_data, fg_color=SECONDARY_COLOR, text_color="white"
+            command=self.refresh_bills_data, fg_color=SECONDARY_COLOR, text_color="white", height=36
         )
-        refresh_btn.pack(side="right", padx=SPACING_SM)
+        refresh_btn.pack(side="right", padx=SPACING_SM, pady=SPACING_SM)
         
         self.apply_btn = icon_manager.get_button_with_icon(
             action_btn_frame, text=" Apply Changes", icon_name=ICON_APPLY, 
-            command=self.apply_pending_changes, fg_color=SUCCESS_COLOR, text_color="white"
+            command=self.apply_pending_changes, fg_color=SUCCESS_COLOR, text_color="white", height=36
         )
-        self.apply_btn.pack(side="right", padx=SPACING_SM)
+        self.apply_btn.pack(side="right", padx=SPACING_SM, pady=SPACING_SM)
         
-        # Pagination controls
-        pagination_frame = ctk.CTkFrame(self.content, fg_color=BACKGROUND_COLOR)
-        pagination_frame.grid(row=5, column=0, sticky="ew", pady=(SPACING_SM, 0))
-        
-        # Items per page selector
-        ctk.CTkLabel(pagination_frame, text="Items per page:").pack(side="left", padx=SPACING_SM)
+        # --- Pagination Controls ---
+        pagination_frame = ctk.CTkFrame(self.content, fg_color=button_bg, border_color=border_color, border_width=1)
+        pagination_frame.grid(row=5, column=0, sticky="ew", pady=(SPACING_SM, SPACING_SM))
+        ctk.CTkLabel(pagination_frame, text="Items per page:", text_color=button_fg).pack(side="left", padx=SPACING_SM)
         self.items_per_page_var = ctk.StringVar(value=str(self._items_per_page))
-        items_combo = ttk.Combobox(pagination_frame, textvariable=self.items_per_page_var,
-                                  values=["10", "20", "50", "100"], state="readonly", width=8)
+        items_combo = CTkComboBox(pagination_frame, variable=self.items_per_page_var,
+                                  values=["10", "20", "50", "100"], width=80, fg_color=entry_bg, text_color=entry_fg, dropdown_fg_color=entry_bg, dropdown_text_color=entry_fg)
         items_combo.pack(side="left", padx=SPACING_SM)
         items_combo.bind("<<ComboboxSelected>>", self.on_items_per_page_change)
         
@@ -1122,19 +1140,19 @@ class MainWindow(ctk.CTk):
         # Navigation buttons
         self.first_page_btn = ctk.CTkButton(pagination_frame, text="⏮️ First", width=80, 
                                            command=self.go_to_first_page, fg_color=PRIMARY_COLOR, text_color="white")
-        self.first_page_btn.pack(side="right", padx=SPACING_SM)
+        self.first_page_btn.pack(side="right", padx=SPACING_SM, pady=SPACING_SM)
         
         self.prev_page_btn = ctk.CTkButton(pagination_frame, text="◀️ Prev", width=80, 
                                           command=self.go_to_prev_page, fg_color=PRIMARY_COLOR, text_color="white")
-        self.prev_page_btn.pack(side="right", padx=SPACING_SM)
+        self.prev_page_btn.pack(side="right", padx=SPACING_SM, pady=SPACING_SM)
         
         self.next_page_btn = ctk.CTkButton(pagination_frame, text="Next ▶️", width=80, 
                                           command=self.go_to_next_page, fg_color=PRIMARY_COLOR, text_color="white")
-        self.next_page_btn.pack(side="right", padx=SPACING_SM)
+        self.next_page_btn.pack(side="right", padx=SPACING_SM, pady=SPACING_SM)
         
         self.last_page_btn = ctk.CTkButton(pagination_frame, text="Last ⏭️", width=80, 
                                           command=self.go_to_last_page, fg_color=PRIMARY_COLOR, text_color="white")
-        self.last_page_btn.pack(side="right", padx=SPACING_SM)
+        self.last_page_btn.pack(side="right", padx=SPACING_SM, pady=SPACING_SM)
 
     def apply_filters(self, *args):
         """Apply all filters: status, period, and search"""
@@ -2877,6 +2895,11 @@ class MainWindow(ctk.CTk):
                 
         except Exception as e:
             show_popup(self, "Error", f"Failed to snooze reminder: {str(e)}", color="red")
+
+# Add this function near the top of the file (after color constants)
+def is_dark_mode():
+    mode = ctk.get_appearance_mode()
+    return mode.lower() == "dark"
 
 if __name__ == "__main__":
     app = MainWindow()
