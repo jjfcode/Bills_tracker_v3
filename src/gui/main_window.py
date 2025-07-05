@@ -14,6 +14,8 @@ from tkcalendar import DateEntry
 from tkinter import messagebox
 from .icon_utils import icon_manager, ICON_ADD, ICON_EDIT, ICON_DELETE, ICON_SAVE, ICON_CANCEL, ICON_SEARCH, ICON_CALENDAR, ICON_EXPORT, ICON_IMPORT, ICON_REFRESH, ICON_SETTINGS, ICON_CATEGORIES, ICON_BILLS, ICON_APPLY, ICON_CLEAR
 from .validation import BillValidator, CategoryValidator, ValidationError, validate_field_in_real_time
+from .notification_dialog import NotificationManager
+from ..core.reminder_service import ReminderService
 
 BILLING_CYCLES = [
     "weekly", "bi-weekly", "monthly", "quarterly", "semi-annually", "annually", "one-time"
@@ -253,6 +255,11 @@ class AddBillDialog(ctk.CTkToplevel):
         self.reminder_days_combo = ttk.Combobox(self, textvariable=self.reminder_days_var, values=REMINDER_DAYS, state="readonly")
         self.reminder_days_combo.grid(row=row, column=1, padx=SPACING_SM, pady=SPACING_SM, sticky="ew")
         row += 1
+        # Amount
+        ctk.CTkLabel(self, text="Amount ($):").grid(row=row, column=0, padx=SPACING_SM, pady=SPACING_SM, sticky="e")
+        self.amount_entry = ctk.CTkEntry(self, placeholder_text="Enter amount...")
+        self.amount_entry.grid(row=row, column=1, padx=SPACING_SM, pady=SPACING_SM, sticky="ew")
+        row += 1
         # Payment Method (dropdown)
         ctk.CTkLabel(self, text="Payment Method:").grid(row=row, column=0, padx=SPACING_SM, pady=SPACING_SM, sticky="e")
         self.payment_method_var = StringVar(value="Not Set")
@@ -330,6 +337,7 @@ class AddBillDialog(ctk.CTkToplevel):
                 "confirmation_number": self.confirmation_entry.get().strip(),
                 "billing_cycle": self.billing_cycle_var.get(),
                 "reminder_days": self.reminder_days_var.get(),
+                "amount": self._parse_amount(self.amount_entry.get().strip()),
                 "web_page": self.web_page_entry.get().strip(),
                 "company_email": self.company_email_entry.get().strip(),
                 "support_phone": self.support_phone_entry.get().strip(),
@@ -384,6 +392,17 @@ class AddBillDialog(ctk.CTkToplevel):
             error_message = f"Failed to add bill: {str(e)}"
             self.error_label.configure(text=error_message)
             show_popup(self, "Error", error_message, color="red")
+            
+    def _parse_amount(self, amount_str):
+        """Parse amount string to float, return None if empty or invalid."""
+        if not amount_str:
+            return None
+        try:
+            # Remove currency symbols and commas
+            cleaned = amount_str.replace('$', '').replace(',', '').strip()
+            return float(cleaned) if cleaned else None
+        except ValueError:
+            return None
 
 class EditBillDialog(ctk.CTkToplevel):
     def __init__(self, master, bill_data, on_success):
@@ -437,6 +456,14 @@ class EditBillDialog(ctk.CTkToplevel):
         self.reminder_days_var = IntVar(value=self.bill_data.get("reminder_days", 7))
         self.reminder_days_combo = ttk.Combobox(self, textvariable=self.reminder_days_var, values=REMINDER_DAYS, state="readonly")
         self.reminder_days_combo.grid(row=row, column=1, padx=SPACING_SM, pady=SPACING_SM, sticky="ew")
+        row += 1
+        # Amount
+        ctk.CTkLabel(self, text="Amount ($):").grid(row=row, column=0, padx=SPACING_SM, pady=SPACING_SM, sticky="e")
+        self.amount_entry = ctk.CTkEntry(self, placeholder_text="Enter amount...")
+        amount_value = self.bill_data.get("amount")
+        if amount_value:
+            self.amount_entry.insert(0, f"${amount_value:.2f}")
+        self.amount_entry.grid(row=row, column=1, padx=SPACING_SM, pady=SPACING_SM, sticky="ew")
         row += 1
         # Payment Method (dropdown)
         ctk.CTkLabel(self, text="Payment Method:").grid(row=row, column=0, padx=SPACING_SM, pady=SPACING_SM, sticky="e")
@@ -525,6 +552,7 @@ class EditBillDialog(ctk.CTkToplevel):
                 "confirmation_number": self.confirmation_entry.get().strip(),
                 "billing_cycle": self.billing_cycle_var.get(),
                 "reminder_days": self.reminder_days_var.get(),
+                "amount": self._parse_amount(self.amount_entry.get().strip()),
                 "web_page": self.web_page_entry.get().strip(),
                 "company_email": self.company_email_entry.get().strip(),
                 "support_phone": self.support_phone_entry.get().strip(),
@@ -581,6 +609,17 @@ class EditBillDialog(ctk.CTkToplevel):
             error_message = f"Failed to update bill: {str(e)}"
             self.error_label.configure(text=error_message)
             show_popup(self, "Error", error_message, color="red")
+            
+    def _parse_amount(self, amount_str):
+        """Parse amount string to float, return None if empty or invalid."""
+        if not amount_str:
+            return None
+        try:
+            # Remove currency symbols and commas
+            cleaned = amount_str.replace('$', '').replace(',', '').strip()
+            return float(cleaned) if cleaned else None
+        except ValueError:
+            return None
 
 class AddCategoryDialog(ctk.CTkToplevel):
     def __init__(self, master, on_success):
@@ -767,11 +806,21 @@ class MainWindow(ctk.CTk):
         self._items_per_page = 20  # Default items per page
         self._total_pages = 1
         
+        # Initialize reminder service and notification manager
+        self.notification_manager = NotificationManager()
+        self.reminder_service = ReminderService(check_interval=300)  # Check every 5 minutes
+        
         # Setup UI
         self._setup_ui()
         
         # Show bills view by default
         self.show_bills_view()
+        
+        # Start reminder service
+        try:
+            self.reminder_service.start(notification_callback=self._handle_reminder_notification)
+        except Exception as e:
+            print(f"Error starting reminder service: {e}")
     
     def _setup_ui(self):
         # Configure grid for responsive layout
@@ -2172,6 +2221,14 @@ class MainWindow(ctk.CTk):
     def _on_close(self):
         """Handle window close event"""
         try:
+            # Stop reminder service
+            if hasattr(self, 'reminder_service'):
+                self.reminder_service.stop()
+            
+            # Close all notifications
+            if hasattr(self, 'notification_manager'):
+                self.notification_manager.close_all_notifications()
+            
             # Cancel any pending after() calls to prevent invalid command errors
             for after_id in self.tk.eval('after info').split():
                 if after_id.isdigit():
@@ -2188,6 +2245,85 @@ class MainWindow(ctk.CTk):
                 self.destroy()
             except:
                 pass
+                
+    def _handle_reminder_notification(self, notification_data):
+        """
+        Handle reminder notifications from the reminder service.
+        
+        Args:
+            notification_data: Dictionary containing notification information
+        """
+        try:
+            # Show notification using the notification manager
+            self.notification_manager.show_notification(
+                notification_data,
+                on_mark_paid=self._mark_bill_as_paid_from_notification,
+                on_snooze=self._snooze_reminder_from_notification
+            )
+        except Exception as e:
+            print(f"Error handling reminder notification: {e}")
+            # Fallback: just print the notification
+            print(f"NOTIFICATION: {notification_data.get('message', 'Bill reminder')}")
+            
+    def _mark_bill_as_paid_from_notification(self, bill_id):
+        """
+        Mark a bill as paid from notification.
+        
+        Args:
+            bill_id: ID of the bill to mark as paid
+        """
+        try:
+            # Find the bill in current data
+            bill = None
+            for b in self._bills_data:
+                if b['id'] == bill_id:
+                    bill = b
+                    break
+                    
+            if bill:
+                # Mark as paid
+                bill['paid'] = True
+                bill['confirmation_number'] = f"PAID-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+                
+                # Update in database
+                update_bill(bill_id, bill)
+                
+                # Refresh the view
+                self.show_bills_view()
+                
+                # Show success message
+                show_popup(self, "Success", f"Marked '{bill['name']}' as paid!", color="green")
+            else:
+                show_popup(self, "Error", "Bill not found!", color="red")
+                
+        except Exception as e:
+            show_popup(self, "Error", f"Failed to mark bill as paid: {str(e)}", color="red")
+            
+    def _snooze_reminder_from_notification(self, bill_id, snooze_seconds):
+        """
+        Snooze a reminder from notification.
+        
+        Args:
+            bill_id: ID of the bill to snooze
+            snooze_seconds: Number of seconds to snooze
+        """
+        try:
+            # Mark the reminder as sent to prevent immediate re-triggering
+            # The reminder service will check again after the snooze period
+            bill = None
+            for b in self._bills_data:
+                if b['id'] == bill_id:
+                    bill = b
+                    break
+                    
+            if bill:
+                self.reminder_service.mark_reminder_sent(bill_id, bill['due_date'])
+                show_popup(self, "Info", f"Reminder snoozed for {snooze_seconds//3600} hour(s)", color="blue")
+            else:
+                show_popup(self, "Error", "Bill not found!", color="red")
+                
+        except Exception as e:
+            show_popup(self, "Error", f"Failed to snooze reminder: {str(e)}", color="red")
 
 class PaymentConfirmationDialog(ctk.CTkToplevel):
     def __init__(self, master, bill_name, on_confirm):

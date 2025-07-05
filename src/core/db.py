@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS bills (
     due_date TEXT NOT NULL,
     billing_cycle TEXT,
     reminder_days INTEGER,
+    amount REAL DEFAULT NULL,
     web_page TEXT,
     login_info TEXT,
     password TEXT,
@@ -59,6 +60,7 @@ CREATE TABLE IF NOT EXISTS templates (
     due_date TEXT,
     billing_cycle TEXT,
     reminder_days INTEGER,
+    amount REAL DEFAULT NULL,
     web_page TEXT,
     login_info TEXT,
     password TEXT,
@@ -159,15 +161,16 @@ def insert_bill(bill_data):
     cursor = conn.cursor()
     cursor.execute('''
         INSERT INTO bills (
-            name, due_date, billing_cycle, reminder_days, web_page,
+            name, due_date, billing_cycle, reminder_days, amount, web_page,
             login_info, password, paid, confirmation_number, company_email, support_phone, billing_phone,
             customer_service_hours, account_number, reference_id, support_chat_url, mobile_app, category_id, payment_method_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (
         bill_data.get('name', ''),
         bill_data.get('due_date', ''),
         bill_data.get('billing_cycle', ''),
         bill_data.get('reminder_days', 7),
+        bill_data.get('amount', None),
         bill_data.get('web_page', ''),
         bill_data.get('login_info', ''),
         bill_data.get('password', ''),
@@ -197,6 +200,7 @@ def update_bill(bill_id, bill_data):
             due_date = ?,
             billing_cycle = ?,
             reminder_days = ?,
+            amount = ?,
             web_page = ?,
             login_info = ?,
             password = ?,
@@ -218,6 +222,7 @@ def update_bill(bill_id, bill_data):
         bill_data.get('due_date', ''),
         bill_data.get('billing_cycle', ''),
         bill_data.get('reminder_days', 7),
+        bill_data.get('amount', None),
         bill_data.get('web_page', ''),
         bill_data.get('login_info', ''),
         bill_data.get('password', ''),

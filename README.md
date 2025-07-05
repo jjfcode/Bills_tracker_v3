@@ -25,6 +25,17 @@ A modern, feature-rich desktop application for managing bills and recurring paym
 - **Direct Input** - Type dates manually in YYYY-MM-DD format
 - **Date Validation** - Automatic validation of date format and validity
 
+### 🔔 **Smart Reminders & Notifications** 🆕
+- **Background Reminder Service** - Automatically checks for due bills every 5 minutes
+- **Smart Due Date Detection** - Identifies overdue, urgent (due today), and upcoming bills
+- **Desktop Popup Notifications** - Modern, always-on-top notification dialogs with bill details
+- **Urgency-Based Styling** - Color-coded notifications (red for overdue, orange for urgent, blue for reminders)
+- **Quick Action Buttons** - Mark as paid, snooze reminder, open website, send email directly from notifications
+- **Duplicate Prevention** - Tracks sent reminders to avoid spam notifications
+- **Amount Field Support** - Track bill amounts for better financial management
+- **Auto-Close Timer** - Notifications auto-close after 30 seconds if not acted upon
+- **Snooze Functionality** - Snooze reminders for 1 hour to avoid immediate re-triggering
+
 ### 🏷️ **Category System**
 - **10 Pre-defined Categories** with custom colors
 - **Custom Category Management** - Add, edit, delete categories

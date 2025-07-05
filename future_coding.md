@@ -72,6 +72,18 @@ This document outlines the next steps and features to implement for the Bills Tr
 - [x] **Visual Separation** - Clear separation between rows and columns
 - [x] **Dual Table Support** - Both bills and categories tables styled consistently
 
+### Reminders and Notifications Achievements:
+- [x] **Background Reminder Service** - Automated service that checks for due bills every 5 minutes
+- [x] **Smart Due Date Detection** - Identifies overdue, urgent (due today), and upcoming bills
+- [x] **Desktop Popup Notifications** - Modern, always-on-top notification dialogs with bill details
+- [x] **Urgency-Based Styling** - Color-coded notifications (red for overdue, orange for urgent, blue for reminders)
+- [x] **Quick Action Buttons** - Mark as paid, snooze reminder, open website, send email directly from notifications
+- [x] **Duplicate Prevention** - Tracks sent reminders to avoid spam notifications
+- [x] **Amount Field Support** - Added amount field to database and UI for better bill tracking
+- [x] **Notification Manager** - Handles multiple notifications and prevents UI clutter
+- [x] **Auto-Close Timer** - Notifications auto-close after 30 seconds if not acted upon
+- [x] **Snooze Functionality** - Users can snooze reminders for 1 hour to avoid immediate re-triggering
+
 ## 4. Data Import/Export
 - [x] Export bills to CSV/Excel
 - [x] Import bills from CSV/Excel
@@ -81,7 +93,7 @@ This document outlines the next steps and features to implement for the Bills Tr
 - [x] Search and filter bills by name, due date, category, etc.
 - [x] Sort bills by any column
 - [x] Category and payment method management
-- [ ] Reminders and notifications (desktop popups)
+- [x] Reminders and notifications (desktop popups) ✅ **COMPLETED**
 - [ ] Settings panel (theme, backup, etc.)
 - [ ] User authentication (optional)
 
@@ -201,12 +213,12 @@ This document outlines the next steps and features to implement for the Bills Tr
 
 ## 📊 **Progress Tracking**
 
-### Completed Features: 92%
+### Completed Features: 95%
 - ✅ Core functionality: 100%
 - ✅ UI/UX improvements: 100%
-- ✅ Data management: 95%
+- ✅ Data management: 100%
 - ✅ Input validation: 100%
-- 🔄 Advanced features: 70%
+- ✅ Advanced features: 85%
 - 🔄 Code quality: 40%
 
 ### Next Milestone: UI Polish Complete ✅
@@ -222,4 +234,4 @@ This document outlines the next steps and features to implement for the Bills Tr
 
 ---
 
-*Last updated: December 2024 - Multi-Select & Bulk Delete Complete! 🎉* 
+*Last updated: December 2024 - Reminders & Notifications Complete! 🎉* 
