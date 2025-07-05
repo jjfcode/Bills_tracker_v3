@@ -30,6 +30,8 @@ BACKGROUND_COLOR = "#f7f9fa"
 TEXT_COLOR = "#222831"
 SUCCESS_COLOR = "#4bb543"
 ERROR_COLOR = "#e74c3c"
+WARNING_COLOR = "#ffa500"
+URGENT_COLOR = "#ff0000"
 DISABLED_COLOR = "#b0b0b0"
 
 SPACING_XS = 4
@@ -806,9 +808,41 @@ class MainWindow(ctk.CTk):
         self._items_per_page = 20  # Default items per page
         self._total_pages = 1
         
-        # Initialize reminder service and notification manager
+        # Load configuration
+        try:
+            from core.config import config_manager
+            self.config_manager = config_manager
+            
+            # Apply saved theme
+            saved_theme = config_manager.get_theme()
+            if saved_theme != "System":
+                ctk.set_appearance_mode(saved_theme.lower())
+            
+            # Apply saved window size
+            width, height = config_manager.get_window_size()
+            self.geometry(f"{width}x{height}")
+            
+            # Apply saved items per page
+            self._items_per_page = config_manager.get_items_per_page()
+            
+        except Exception as e:
+            print(f"Error loading configuration: {e}")
+            self.config_manager = None
+        
+        # Initialize reminder service with saved interval
+        check_interval = 300
+        if hasattr(self, 'config_manager') and self.config_manager:
+            check_interval = self.config_manager.get_reminder_check_interval()
+        
+        self.reminder_service = ReminderService(check_interval=check_interval)
+        
+        # Initialize notification manager with saved settings
+        max_notifications = 3
+        if hasattr(self, 'config_manager') and self.config_manager:
+            max_notifications = self.config_manager.get_max_notifications()
+        
         self.notification_manager = NotificationManager()
-        self.reminder_service = ReminderService(check_interval=300)  # Check every 5 minutes
+        self.notification_manager.max_notifications = max_notifications
         
         # Setup UI
         self._setup_ui()
@@ -1451,11 +1485,561 @@ class MainWindow(ctk.CTk):
         self.populate_categories_table()
 
     def show_settings_view(self):
+        """Show the settings view"""
         self.clear_content()
-        self.settings_frame = ctk.CTkFrame(self.content)
-        self.settings_frame.grid(row=0, column=0, sticky="nswe")
-        label = ctk.CTkLabel(self.settings_frame, text="Settings View (Coming Soon)", font=("Arial", 18))
-        label.pack(padx=SPACING_MD, pady=SPACING_MD)
+        
+        # Title
+        title_label = ctk.CTkLabel(
+            self.content, 
+            text="Settings", 
+            font=("Arial", 24, "bold"),
+            text_color=PRIMARY_COLOR
+        )
+        title_label.pack(pady=(SPACING_LG, SPACING_MD))
+        
+        # Create scrollable settings frame
+        settings_frame = ctk.CTkScrollableFrame(
+            self.content,
+            width=600,
+            height=500
+        )
+        settings_frame.pack(pady=SPACING_MD, padx=SPACING_MD, fill="both", expand=True)
+        
+        # Theme Settings Section
+        self._create_theme_section(settings_frame)
+        
+        # Backup Settings Section
+        self._create_backup_section(settings_frame)
+        
+        # Notification Settings Section
+        self._create_notification_section(settings_frame)
+        
+        # Database Settings Section
+        self._create_database_section(settings_frame)
+        
+        # About Section
+        self._create_about_section(settings_frame)
+    
+    def _create_theme_section(self, parent):
+        """Create theme settings section"""
+        # Theme section header
+        theme_header = ctk.CTkLabel(
+            parent,
+            text="🎨 Theme Settings",
+            font=("Arial", 16, "bold"),
+            text_color=PRIMARY_COLOR
+        )
+        theme_header.pack(pady=(SPACING_MD, SPACING_SM), anchor="w")
+        
+        # Theme selection frame
+        theme_frame = ctk.CTkFrame(parent)
+        theme_frame.pack(fill="x", pady=SPACING_SM, padx=SPACING_SM)
+        
+        # Current theme label
+        current_theme = ctk.get_appearance_mode()
+        theme_label = ctk.CTkLabel(
+            theme_frame,
+            text=f"Current Theme: {current_theme.title()}",
+            font=("Arial", 12)
+        )
+        theme_label.pack(pady=SPACING_SM)
+        
+        # Theme buttons frame
+        theme_buttons_frame = ctk.CTkFrame(theme_frame)
+        theme_buttons_frame.pack(pady=SPACING_SM)
+        
+        # Light theme button
+        light_btn = ctk.CTkButton(
+            theme_buttons_frame,
+            text="Light Theme",
+            command=lambda: self._change_theme("Light"),
+            fg_color=PRIMARY_COLOR if current_theme == "Light" else "gray",
+            width=120
+        )
+        light_btn.pack(side="left", padx=SPACING_SM)
+        
+        # Dark theme button
+        dark_btn = ctk.CTkButton(
+            theme_buttons_frame,
+            text="Dark Theme",
+            command=lambda: self._change_theme("Dark"),
+            fg_color=PRIMARY_COLOR if current_theme == "Dark" else "gray",
+            width=120
+        )
+        dark_btn.pack(side="left", padx=SPACING_SM)
+        
+        # System theme button
+        system_btn = ctk.CTkButton(
+            theme_buttons_frame,
+            text="System Theme",
+            command=lambda: self._change_theme("System"),
+            fg_color=PRIMARY_COLOR if current_theme == "System" else "gray",
+            width=120
+        )
+        system_btn.pack(side="left", padx=SPACING_SM)
+        
+        # Store buttons for updating colors
+        self.theme_buttons = [light_btn, dark_btn, system_btn]
+    
+    def _create_backup_section(self, parent):
+        """Create backup settings section"""
+        # Backup section header
+        backup_header = ctk.CTkLabel(
+            parent,
+            text="💾 Backup & Restore",
+            font=("Arial", 16, "bold"),
+            text_color=PRIMARY_COLOR
+        )
+        backup_header.pack(pady=(SPACING_LG, SPACING_SM), anchor="w")
+        
+        # Backup frame
+        backup_frame = ctk.CTkFrame(parent)
+        backup_frame.pack(fill="x", pady=SPACING_SM, padx=SPACING_SM)
+        
+        # Backup buttons frame
+        backup_buttons_frame = ctk.CTkFrame(backup_frame)
+        backup_buttons_frame.pack(pady=SPACING_MD)
+        
+        # Export backup button
+        export_btn = ctk.CTkButton(
+            backup_buttons_frame,
+            text="Export Database Backup",
+            command=self._export_backup,
+            fg_color=SUCCESS_COLOR,
+            text_color="white",
+            width=200
+        )
+        export_btn.pack(side="left", padx=SPACING_SM)
+        
+        # Import backup button
+        import_btn = ctk.CTkButton(
+            backup_buttons_frame,
+            text="Import Database Backup",
+            command=self._import_backup,
+            fg_color=WARNING_COLOR,
+            text_color="white",
+            width=200
+        )
+        import_btn.pack(side="left", padx=SPACING_SM)
+        
+        # Auto-backup toggle
+        auto_backup_var = ctk.BooleanVar(value=self._get_auto_backup_setting())
+        auto_backup_checkbox = ctk.CTkCheckBox(
+            backup_frame,
+            text="Enable automatic backups (weekly)",
+            variable=auto_backup_var,
+            command=lambda: self._toggle_auto_backup(auto_backup_var.get())
+        )
+        auto_backup_checkbox.pack(pady=SPACING_SM)
+    
+    def _create_notification_section(self, parent):
+        """Create notification settings section"""
+        # Notification section header
+        notification_header = ctk.CTkLabel(
+            parent,
+            text="🔔 Notification Settings",
+            font=("Arial", 16, "bold"),
+            text_color=PRIMARY_COLOR
+        )
+        notification_header.pack(pady=(SPACING_LG, SPACING_SM), anchor="w")
+        
+        # Notification frame
+        notification_frame = ctk.CTkFrame(parent)
+        notification_frame.pack(fill="x", pady=SPACING_SM, padx=SPACING_SM)
+        
+        # Check interval setting
+        interval_frame = ctk.CTkFrame(notification_frame)
+        interval_frame.pack(fill="x", pady=SPACING_SM, padx=SPACING_SM)
+        
+        ctk.CTkLabel(
+            interval_frame,
+            text="Reminder Check Interval:",
+            font=("Arial", 12)
+        ).pack(side="left", padx=SPACING_SM)
+        
+        interval_var = ctk.StringVar(value=str(self._get_check_interval()))
+        interval_entry = ctk.CTkEntry(
+            interval_frame,
+            textvariable=interval_var,
+            width=80
+        )
+        interval_entry.pack(side="left", padx=SPACING_SM)
+        
+        ctk.CTkLabel(
+            interval_frame,
+            text="seconds (minimum 60)",
+            font=("Arial", 10),
+            text_color="gray"
+        ).pack(side="left", padx=SPACING_SM)
+        
+        # Apply interval button
+        apply_interval_btn = ctk.CTkButton(
+            interval_frame,
+            text="Apply",
+            command=lambda: self._update_check_interval(interval_var.get()),
+            width=80
+        )
+        apply_interval_btn.pack(side="right", padx=SPACING_SM)
+        
+        # Notification toggles
+        toggles_frame = ctk.CTkFrame(notification_frame)
+        toggles_frame.pack(fill="x", pady=SPACING_SM, padx=SPACING_SM)
+        
+        # Enable notifications toggle
+        notifications_var = ctk.BooleanVar(value=self._get_notifications_enabled())
+        notifications_checkbox = ctk.CTkCheckBox(
+            toggles_frame,
+            text="Enable desktop notifications",
+            variable=notifications_var,
+            command=lambda: self._toggle_notifications(notifications_var.get())
+        )
+        notifications_checkbox.pack(pady=SPACING_SM)
+        
+        # Auto-close notifications toggle
+        auto_close_var = ctk.BooleanVar(value=self._get_auto_close_notifications())
+        auto_close_checkbox = ctk.CTkCheckBox(
+            toggles_frame,
+            text="Auto-close notifications after 30 seconds",
+            variable=auto_close_var,
+            command=lambda: self._toggle_auto_close_notifications(auto_close_var.get())
+        )
+        auto_close_checkbox.pack(pady=SPACING_SM)
+    
+    def _create_database_section(self, parent):
+        """Create database settings section"""
+        # Database section header
+        database_header = ctk.CTkLabel(
+            parent,
+            text="🗄️ Database Settings",
+            font=("Arial", 16, "bold"),
+            text_color=PRIMARY_COLOR
+        )
+        database_header.pack(pady=(SPACING_LG, SPACING_SM), anchor="w")
+        
+        # Database frame
+        database_frame = ctk.CTkFrame(parent)
+        database_frame.pack(fill="x", pady=SPACING_SM, padx=SPACING_SM)
+        
+        # Database info
+        db_info_frame = ctk.CTkFrame(database_frame)
+        db_info_frame.pack(fill="x", pady=SPACING_SM, padx=SPACING_SM)
+        
+        # Get database statistics
+        bill_count = len(self._bills_data) if hasattr(self, '_bills_data') else 0
+        categories_count = len(fetch_all_categories()) if 'fetch_all_categories' in globals() else 0
+        
+        ctk.CTkLabel(
+            db_info_frame,
+            text=f"Total Bills: {bill_count}",
+            font=("Arial", 12)
+        ).pack(anchor="w", padx=SPACING_SM)
+        
+        ctk.CTkLabel(
+            db_info_frame,
+            text=f"Total Categories: {categories_count}",
+            font=("Arial", 12)
+        ).pack(anchor="w", padx=SPACING_SM)
+        
+        # Database actions frame
+        db_actions_frame = ctk.CTkFrame(database_frame)
+        db_actions_frame.pack(fill="x", pady=SPACING_SM, padx=SPACING_SM)
+        
+        # Compact database button
+        compact_btn = ctk.CTkButton(
+            db_actions_frame,
+            text="Compact Database",
+            command=self._compact_database,
+            fg_color=PRIMARY_COLOR,
+            text_color="white",
+            width=150
+        )
+        compact_btn.pack(side="left", padx=SPACING_SM)
+        
+        # Reset database button
+        reset_btn = ctk.CTkButton(
+            db_actions_frame,
+            text="Reset Database",
+            command=self._reset_database,
+            fg_color=ERROR_COLOR,
+            text_color="white",
+            width=150
+        )
+        reset_btn.pack(side="left", padx=SPACING_SM)
+    
+    def _create_about_section(self, parent):
+        """Create about section"""
+        # About section header
+        about_header = ctk.CTkLabel(
+            parent,
+            text="ℹ️ About",
+            font=("Arial", 16, "bold"),
+            text_color=PRIMARY_COLOR
+        )
+        about_header.pack(pady=(SPACING_LG, SPACING_SM), anchor="w")
+        
+        # About frame
+        about_frame = ctk.CTkFrame(parent)
+        about_frame.pack(fill="x", pady=SPACING_SM, padx=SPACING_SM)
+        
+        # App info
+        ctk.CTkLabel(
+            about_frame,
+            text="Bills Tracker v3",
+            font=("Arial", 14, "bold")
+        ).pack(pady=SPACING_SM)
+        
+        ctk.CTkLabel(
+            about_frame,
+            text="A comprehensive desktop application for managing bills and payments",
+            font=("Arial", 11),
+            text_color="gray"
+        ).pack(pady=SPACING_SM)
+        
+        ctk.CTkLabel(
+            about_frame,
+            text="Features: Bill management, categories, reminders, notifications, import/export",
+            font=("Arial", 10),
+            text_color="gray"
+        ).pack(pady=SPACING_SM)
+    
+    def _change_theme(self, theme):
+        """Change the application theme"""
+        try:
+            if theme == "System":
+                ctk.set_appearance_mode("System")
+            else:
+                ctk.set_appearance_mode(theme.lower())
+            
+            # Update button colors
+            for btn in self.theme_buttons:
+                if btn.cget("text").lower().startswith(theme.lower()):
+                    btn.configure(fg_color=PRIMARY_COLOR)
+                else:
+                    btn.configure(fg_color="gray")
+            
+            # Save theme preference
+            self._save_theme_preference(theme)
+            
+        except Exception as e:
+            print(f"Error changing theme: {e}")
+    
+    def _export_backup(self):
+        """Export database backup"""
+        try:
+            from tkinter import filedialog
+            import shutil
+            import os
+            
+            # Get backup file path
+            backup_path = filedialog.asksaveasfilename(
+                defaultextension=".db",
+                filetypes=[("Database files", "*.db"), ("All files", "*.*")],
+                title="Export Database Backup"
+            )
+            
+            if backup_path:
+                # Copy database file
+                shutil.copy2("bills_tracker.db", backup_path)
+                show_popup(self, "Success", f"Database backup exported to:\n{backup_path}", color="green")
+                
+        except Exception as e:
+            show_popup(self, "Error", f"Failed to export backup: {str(e)}", color="red")
+    
+    def _import_backup(self):
+        """Import database backup"""
+        try:
+            from tkinter import filedialog
+            import shutil
+            import os
+            
+            # Get backup file path
+            backup_path = filedialog.askopenfilename(
+                filetypes=[("Database files", "*.db"), ("All files", "*.*")],
+                title="Import Database Backup"
+            )
+            
+            if backup_path:
+                # Confirm import
+                confirm = ctk.CTkToplevel(self)
+                confirm.title("Confirm Import")
+                confirm.geometry("400x200")
+                
+                ctk.CTkLabel(
+                    confirm,
+                    text="This will replace your current database.\nAre you sure you want to continue?",
+                    font=("Arial", 12)
+                ).pack(pady=SPACING_MD)
+                
+                def do_import():
+                    try:
+                        # Backup current database
+                        if os.path.exists("bills_tracker.db"):
+                            shutil.copy2("bills_tracker.db", "bills_tracker.db.backup")
+                        
+                        # Import new database
+                        shutil.copy2(backup_path, "bills_tracker.db")
+                        
+                        # Refresh data
+                        self._bills_data = fetch_all_bills()
+                        self._filtered_bills = self._bills_data.copy()
+                        self.show_bills_view()
+                        
+                        show_popup(self, "Success", "Database imported successfully!", color="green")
+                        confirm.destroy()
+                        
+                    except Exception as e:
+                        show_popup(self, "Error", f"Failed to import database: {str(e)}", color="red")
+                        confirm.destroy()
+                
+                def cancel_import():
+                    confirm.destroy()
+                
+                ctk.CTkButton(confirm, text="Import", fg_color="red", command=do_import).pack(side="left", padx=SPACING_SM, pady=SPACING_SM)
+                ctk.CTkButton(confirm, text="Cancel", command=cancel_import).pack(side="right", padx=SPACING_SM, pady=SPACING_SM)
+                
+        except Exception as e:
+            show_popup(self, "Error", f"Failed to import backup: {str(e)}", color="red")
+    
+    def _compact_database(self):
+        """Compact the database to reduce file size"""
+        try:
+            import sqlite3
+            
+            conn = sqlite3.connect("bills_tracker.db")
+            conn.execute("VACUUM")
+            conn.close()
+            
+            show_popup(self, "Success", "Database compacted successfully!", color="green")
+            
+        except Exception as e:
+            show_popup(self, "Error", f"Failed to compact database: {str(e)}", color="red")
+    
+    def _reset_database(self):
+        """Reset the database (clear all data)"""
+        try:
+            confirm = ctk.CTkToplevel(self)
+            confirm.title("Confirm Reset")
+            confirm.geometry("400x250")
+            
+            ctk.CTkLabel(
+                confirm,
+                text="⚠️ WARNING: This will delete ALL data!\n\nThis action cannot be undone.\n\nAre you absolutely sure?",
+                font=("Arial", 12),
+                text_color="red"
+            ).pack(pady=SPACING_MD)
+            
+            def do_reset():
+                try:
+                    # Reinitialize database
+                    from core.db import initialize_database
+                    initialize_database()
+                    
+                    # Refresh data
+                    self._bills_data = fetch_all_bills()
+                    self._filtered_bills = self._bills_data.copy()
+                    self.show_bills_view()
+                    
+                    show_popup(self, "Success", "Database reset successfully!", color="green")
+                    confirm.destroy()
+                    
+                except Exception as e:
+                    show_popup(self, "Error", f"Failed to reset database: {str(e)}", color="red")
+                    confirm.destroy()
+            
+            def cancel_reset():
+                confirm.destroy()
+            
+            ctk.CTkButton(confirm, text="RESET DATABASE", fg_color="red", command=do_reset).pack(side="left", padx=SPACING_SM, pady=SPACING_SM)
+            ctk.CTkButton(confirm, text="Cancel", command=cancel_reset).pack(side="right", padx=SPACING_SM, pady=SPACING_SM)
+            
+        except Exception as e:
+            show_popup(self, "Error", f"Failed to reset database: {str(e)}", color="red")
+    
+    # Settings helper methods
+    def _get_auto_backup_setting(self):
+        """Get auto-backup setting from config"""
+        try:
+            from core.config import config_manager
+            return config_manager.get_auto_backup()
+        except:
+            return False
+    
+    def _toggle_auto_backup(self, enabled):
+        """Toggle auto-backup setting"""
+        try:
+            from core.config import config_manager
+            config_manager.set_auto_backup(enabled)
+        except Exception as e:
+            print(f"Error toggling auto-backup: {e}")
+    
+    def _get_check_interval(self):
+        """Get reminder check interval"""
+        try:
+            from core.config import config_manager
+            return config_manager.get_reminder_check_interval()
+        except:
+            return 300
+    
+    def _update_check_interval(self, interval_str):
+        """Update reminder check interval"""
+        try:
+            interval = int(interval_str)
+            if interval < 60:
+                show_popup(self, "Error", "Minimum interval is 60 seconds", color="red")
+                return
+            
+            from core.config import config_manager
+            config_manager.set_reminder_check_interval(interval)
+            
+            if hasattr(self, 'reminder_service'):
+                self.reminder_service.check_interval = interval
+            
+            show_popup(self, "Success", f"Check interval updated to {interval} seconds", color="green")
+                
+        except ValueError:
+            show_popup(self, "Error", "Please enter a valid number", color="red")
+        except Exception as e:
+            show_popup(self, "Error", f"Failed to update interval: {str(e)}", color="red")
+    
+    def _get_notifications_enabled(self):
+        """Get notifications enabled setting"""
+        try:
+            from core.config import config_manager
+            return config_manager.get_notifications_enabled()
+        except:
+            return True
+    
+    def _toggle_notifications(self, enabled):
+        """Toggle notifications"""
+        try:
+            from core.config import config_manager
+            config_manager.set_notifications_enabled(enabled)
+        except Exception as e:
+            print(f"Error toggling notifications: {e}")
+    
+    def _get_auto_close_notifications(self):
+        """Get auto-close notifications setting"""
+        try:
+            from core.config import config_manager
+            return config_manager.get_auto_close_notifications()
+        except:
+            return True
+    
+    def _toggle_auto_close_notifications(self, enabled):
+        """Toggle auto-close notifications"""
+        try:
+            from core.config import config_manager
+            config_manager.set_auto_close_notifications(enabled)
+        except Exception as e:
+            print(f"Error toggling auto-close notifications: {e}")
+    
+    def _save_theme_preference(self, theme):
+        """Save theme preference"""
+        try:
+            from core.config import config_manager
+            config_manager.set_theme(theme)
+        except Exception as e:
+            print(f"Error saving theme preference: {e}")
 
     def edit_selected_bill(self):
         selected = self.bills_table.selection()
@@ -2190,6 +2774,15 @@ class MainWindow(ctk.CTk):
     def _on_close(self):
         """Handle window close event"""
         try:
+            # Save window size
+            if hasattr(self, 'config_manager') and self.config_manager:
+                try:
+                    width = self.winfo_width()
+                    height = self.winfo_height()
+                    self.config_manager.set_window_size(width, height)
+                except Exception as e:
+                    print(f"Error saving window size: {e}")
+            
             # Stop reminder service with shorter timeout
             if hasattr(self, 'reminder_service'):
                 self.reminder_service.stop()

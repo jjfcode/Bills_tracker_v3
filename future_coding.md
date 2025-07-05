@@ -84,6 +84,18 @@ This document outlines the next steps and features to implement for the Bills Tr
 - [x] **Auto-Close Timer** - Notifications auto-close after 30 seconds if not acted upon
 - [x] **Snooze Functionality** - Users can snooze reminders for 1 hour to avoid immediate re-triggering
 
+### Settings Panel Achievements:
+- [x] **Theme Switching** - Light, Dark, and System theme support with real-time switching
+- [x] **Configuration System** - Persistent settings storage in JSON format
+- [x] **Backup & Restore** - Export/import database backups with confirmation dialogs
+- [x] **Notification Settings** - Configure reminder intervals, enable/disable notifications
+- [x] **Database Management** - Compact database, reset database with safety confirmations
+- [x] **Window Size Persistence** - Remembers and restores window size on startup
+- [x] **Items Per Page Setting** - Configurable pagination with persistent preference
+- [x] **Auto-Backup Toggle** - Enable/disable automatic weekly backups
+- [x] **Settings Categories** - Organized settings in themed sections (Theme, Backup, Notifications, Database, About)
+- [x] **Real-time Updates** - Settings apply immediately without requiring restart
+
 ## 4. Data Import/Export
 - [x] Export bills to CSV/Excel
 - [x] Import bills from CSV/Excel
@@ -94,7 +106,7 @@ This document outlines the next steps and features to implement for the Bills Tr
 - [x] Sort bills by any column
 - [x] Category and payment method management
 - [x] Reminders and notifications (desktop popups) ✅ **COMPLETED**
-- [ ] Settings panel (theme, backup, etc.)
+- [x] Settings panel (theme, backup, etc.) ✅ **COMPLETED**
 - [ ] User authentication (optional)
 
 ## 6. Code Quality & Testing
