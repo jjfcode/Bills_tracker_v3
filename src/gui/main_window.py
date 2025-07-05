@@ -378,7 +378,7 @@ class AddBillDialog(ctk.CTkToplevel):
             
             # Insert the bill
             insert_bill(validated_data)
-            show_popup(self, "Success", "Bill added successfully!", color="green")
+                            # Success popup removed for faster workflow
             self.on_success()
             self.destroy()
             
@@ -595,7 +595,7 @@ class EditBillDialog(ctk.CTkToplevel):
             
             # Update the bill
             update_bill(bill_data["id"], bill_data)
-            show_popup(self, "Success", "Bill updated successfully!", color="green")
+                            # Success popup removed for faster workflow
             self.on_success()
             self.destroy()
             
@@ -686,7 +686,7 @@ class AddCategoryDialog(ctk.CTkToplevel):
             # Insert the category
             from db import insert_category
             insert_category(validated_data)
-            show_popup(self, "Success", "Category added successfully!", color="green")
+                            # Success popup removed for faster workflow
             self.on_success()
             self.destroy()
             
@@ -769,7 +769,7 @@ class EditCategoryDialog(ctk.CTkToplevel):
             # Update the category
             from db import update_category
             update_category(self.category_data["id"], validated_data)
-            show_popup(self, "Success", "Category updated successfully!", color="green")
+                            # Success popup removed for faster workflow
             self.on_success()
             self.destroy()
             
@@ -1488,7 +1488,7 @@ class MainWindow(ctk.CTk):
             def do_delete():
                 try:
                     delete_bill(bill["id"])
-                    show_popup(self, "Success", "Bill deleted successfully!", color="green")
+                    # Success popup removed for faster workflow
                     self.show_bills_view()
                 except Exception as e:
                     show_popup(self, "Error", f"Failed to delete bill: {str(e)}", color="red")
@@ -1514,7 +1514,7 @@ class MainWindow(ctk.CTk):
             # Fallback: delete directly
             try:
                 delete_bill(bill["id"])
-                show_popup(self, "Success", "Bill deleted successfully!", color="green")
+                # Success popup removed for faster workflow
                 self.show_bills_view()
             except Exception as e:
                 show_popup(self, "Error", f"Failed to delete bill: {str(e)}", color="red")
@@ -1522,7 +1522,7 @@ class MainWindow(ctk.CTk):
     def bulk_delete_selected_bills(self):
         """Delete multiple selected bills"""
         if not self._selected_bills:
-            show_popup(self, "Info", "No bills selected for deletion.", color="blue")
+            # Info popup removed for faster workflow
             return
         
         selected_count = len(self._selected_bills)
@@ -1564,12 +1564,7 @@ class MainWindow(ctk.CTk):
                     self.show_bills_view()
                     
                     # Show result
-                    if failed_count == 0:
-                        show_popup(self, "Success", f"Successfully deleted {deleted_count} bill(s)!", color="green")
-                    else:
-                        show_popup(self, "Partial Success", 
-                                 f"Deleted {deleted_count} bill(s), failed to delete {failed_count} bill(s).", 
-                                 color="orange")
+                    # Success popup removed for faster workflow
                     
                 except Exception as e:
                     show_popup(self, "Error", f"Failed to delete bills: {str(e)}", color="red")
@@ -1631,7 +1626,7 @@ class MainWindow(ctk.CTk):
                         'payment_method': bill.get('payment_method_name', 'Not Set')
                     })
             
-            show_popup(self, "Success", f"Exported {len(self._bills_data)} bills to {os.path.basename(file_path)}", color="green")
+            # Success popup removed for faster workflow
         except Exception as e:
             show_popup(self, "Error", f"Failed to export bills: {str(e)}", color="red")
 
@@ -1692,10 +1687,7 @@ class MainWindow(ctk.CTk):
             else:
                 self.populate_bills_table(self._filtered_bills)
             
-            message = f"Imported {imported_count} bills successfully!"
-            if skipped_count > 0:
-                message += f" Skipped {skipped_count} bills (duplicates or invalid data)."
-            show_popup(self, "Success", message, color="green")
+            # Success popup removed for faster workflow
             
         except Exception as e:
             show_popup(self, "Error", f"Failed to import bills: {str(e)}", color="red")
@@ -1855,52 +1847,33 @@ class MainWindow(ctk.CTk):
             current_paid = bill.get("paid", False)
             new_paid = not current_paid
             
-            # If marking as paid, show confirmation dialog
             if new_paid:
-                def on_payment_confirmed(confirmation_number):
-                    if confirmation_number is not None:  # User didn't cancel
-                        # Create a copy of the bill for pending changes
-                        pending_bill = bill.copy()
-                        pending_bill["paid"] = True
-                        pending_bill["confirmation_number"] = confirmation_number
-                        
-                        # Store the pending change
-                        self.pending_changes[item_id] = pending_bill
-                        
-                        # Update the display
-                        paid_status = "✓"
-                        values = list(self.bills_table.item(item_id, "values"))
-                        values[1] = paid_status  # Update paid column (now second column)
-                        values[6] = "Paid"  # Update status column
-                        self.bills_table.item(item_id, values=values)
-                        
-                        # Update the button text to show pending changes
-                        pending_count = len(self.pending_changes)
-                        if pending_count > 0:
-                            self.apply_btn.configure(text=f"Apply Changes ({pending_count})", fg_color="orange")
-                        else:
-                            self.apply_btn.configure(text="Apply Changes", fg_color="green")
-                
-                # Show payment confirmation dialog
-                PaymentConfirmationDialog(self, bill.get("name", ""), on_payment_confirmed)
+                # Mark as paid immediately, no confirmation popup
+                pending_bill = bill.copy()
+                pending_bill["paid"] = True
+                pending_bill["confirmation_number"] = ""  # No confirmation number
+                self.pending_changes[item_id] = pending_bill
+                paid_status = "✓"
+                values = list(self.bills_table.item(item_id, "values"))
+                values[1] = paid_status  # Update paid column (now second column)
+                values[6] = "Paid"  # Update status column
+                self.bills_table.item(item_id, values=values)
+                pending_count = len(self.pending_changes)
+                if pending_count > 0:
+                    self.apply_btn.configure(text=f"Apply Changes ({pending_count})", fg_color="orange")
+                else:
+                    self.apply_btn.configure(text="Apply Changes", fg_color="green")
             else:
                 # Marking as unpaid - no confirmation needed
-                # Create a copy of the bill for pending changes
                 pending_bill = bill.copy()
                 pending_bill["paid"] = False
                 pending_bill["confirmation_number"] = ""  # Clear confirmation number
-                
-                # Store the pending change
                 self.pending_changes[item_id] = pending_bill
-                
-                # Update the display
                 paid_status = "☐"
                 values = list(self.bills_table.item(item_id, "values"))
                 values[1] = paid_status  # Update paid column (now second column)
                 values[6] = "Pending"  # Update status column
                 self.bills_table.item(item_id, values=values)
-                
-                # Update the button text to show pending changes
                 pending_count = len(self.pending_changes)
                 if pending_count > 0:
                     self.apply_btn.configure(text=f"Apply Changes ({pending_count})", fg_color="orange")
@@ -1946,7 +1919,7 @@ class MainWindow(ctk.CTk):
     def apply_pending_changes(self):
         """Apply all pending changes to the database"""
         if not self.pending_changes:
-            show_popup(self, "Info", "No changes to apply.", color="blue")
+            # Info popup removed for faster workflow
             return
         
         try:
@@ -2011,11 +1984,7 @@ class MainWindow(ctk.CTk):
             else:
                 self.populate_bills_table(self._filtered_bills)
             
-            # Show success message
-            message = f"Applied {applied_count} changes successfully!"
-            if new_bills_created > 0:
-                message += f" Created {new_bills_created} new bill(s) for next cycle."
-            show_popup(self, "Success", message, color="green")
+            # Success popup removed for faster workflow
             
         except Exception as e:
             show_popup(self, "Error", f"Failed to apply changes: {str(e)}", color="red")
@@ -2051,7 +2020,7 @@ class MainWindow(ctk.CTk):
                         # Clear pending changes
                         self.pending_changes.clear()
                         self.apply_btn.configure(text="Apply Changes", fg_color="green")
-                        show_popup(self, "Success", "Data refreshed successfully!", color="green")
+                        # Success popup removed for faster workflow
                     except Exception as e:
                         show_popup(self, "Error", f"Failed to refresh data: {str(e)}", color="red")
                     safe_destroy()
@@ -2091,7 +2060,7 @@ class MainWindow(ctk.CTk):
                 self.sort_by_column(self._sort_column)
             else:
                 self.populate_bills_table(self._filtered_bills)
-            show_popup(self, "Success", "Data refreshed successfully!", color="green")
+            # Success popup removed for faster workflow
         except Exception as e:
             show_popup(self, "Error", f"Failed to refresh data: {str(e)}", color="red")
 
@@ -2130,7 +2099,7 @@ class MainWindow(ctk.CTk):
         """Edit the selected category"""
         selected = self.categories_table.selection()
         if not selected:
-            show_popup(self, "Info", "Please select a category to edit.", color="blue")
+            # Info popup removed for faster workflow
             return
         
         # Get category data
@@ -2151,7 +2120,7 @@ class MainWindow(ctk.CTk):
         """Delete the selected category"""
         selected = self.categories_table.selection()
         if not selected:
-            show_popup(self, "Info", "Please select a category to delete.", color="blue")
+            # Info popup removed for faster workflow
             return
         
         category_name = self.categories_table.item(selected[0], "values")[0]
@@ -2189,7 +2158,7 @@ class MainWindow(ctk.CTk):
                     
                     if category_id:
                         delete_category(category_id)
-                        show_popup(self, "Success", "Category deleted successfully!", color="green")
+                        # Success popup removed for faster workflow
                         self.refresh_categories()
                     else:
                         show_popup(self, "Error", "Category not found.", color="red")
@@ -2279,7 +2248,7 @@ class MainWindow(ctk.CTk):
                 if b['id'] == bill_id:
                     bill = b
                     break
-                    
+            
             if bill:
                 # Mark as paid
                 bill['paid'] = True
@@ -2291,11 +2260,9 @@ class MainWindow(ctk.CTk):
                 # Refresh the view
                 self.show_bills_view()
                 
-                # Show success message
-                show_popup(self, "Success", f"Marked '{bill['name']}' as paid!", color="green")
+                # Do NOT show a success popup
             else:
                 show_popup(self, "Error", "Bill not found!", color="red")
-                
         except Exception as e:
             show_popup(self, "Error", f"Failed to mark bill as paid: {str(e)}", color="red")
             
@@ -2318,79 +2285,12 @@ class MainWindow(ctk.CTk):
                     
             if bill:
                 self.reminder_service.mark_reminder_sent(bill_id, bill['due_date'])
-                show_popup(self, "Info", f"Reminder snoozed for {snooze_seconds//3600} hour(s)", color="blue")
+                # Info popup removed for faster workflow
             else:
                 show_popup(self, "Error", "Bill not found!", color="red")
                 
         except Exception as e:
             show_popup(self, "Error", f"Failed to snooze reminder: {str(e)}", color="red")
-
-class PaymentConfirmationDialog(ctk.CTkToplevel):
-    def __init__(self, master, bill_name, on_confirm):
-        super().__init__(master)
-        self.on_confirm = on_confirm
-        self.confirmation_number = ""
-        
-        self.title("Payment Confirmation")
-        self.geometry("400x200")
-        self.resizable(False, False)
-        
-        # Center the dialog
-        self.update_idletasks()
-        x = (self.winfo_screenwidth() // 2) - (400 // 2)
-        y = (self.winfo_screenheight() // 2) - (200 // 2)
-        self.geometry(f"400x200+{x}+{y}")
-        
-        self._setup_ui(bill_name)
-        
-        # Make dialog modal
-        self.transient(master)
-        self.grab_set()
-        self.focus_force()
-    
-    def _setup_ui(self, bill_name):
-        # Title
-        title_label = ctk.CTkLabel(self, text="Payment Confirmation", font=("Arial", 16, "bold"))
-        title_label.pack(pady=(SPACING_SM, SPACING_SM))
-        
-        # Bill name
-        bill_label = ctk.CTkLabel(self, text=f"Bill: {bill_name}", font=("Arial", 12))
-        bill_label.pack(pady=(0, SPACING_SM))
-        
-        # Confirmation number entry
-        ctk.CTkLabel(self, text="Confirmation Number (optional):", font=("Arial", 12)).pack(pady=(0, SPACING_SM))
-        self.confirmation_entry = ctk.CTkEntry(self, width=300, placeholder_text="Enter confirmation number...", fg_color=BACKGROUND_COLOR, text_color=TEXT_COLOR)
-        self.confirmation_entry.pack(pady=(0, SPACING_SM))
-        self.confirmation_entry.focus()
-        
-        # Buttons frame
-        btn_frame = ctk.CTkFrame(self)
-        btn_frame.pack(pady=(0, SPACING_SM))
-        
-        confirm_btn = icon_manager.get_button_with_icon(
-            btn_frame, text=" Confirm Payment", icon_name=ICON_SAVE, 
-            command=self._on_confirm, fg_color=SUCCESS_COLOR, text_color="white"
-        )
-        confirm_btn.pack(side="left", padx=SPACING_SM)
-        
-        cancel_btn = icon_manager.get_button_with_icon(
-            btn_frame, text=" Cancel", icon_name=ICON_CANCEL, 
-            command=self._on_cancel, fg_color=ERROR_COLOR, text_color="white"
-        )
-        cancel_btn.pack(side="left", padx=SPACING_SM)
-        
-        # Bind Enter key to confirm
-        self.bind("<Return>", lambda e: self._on_confirm())
-        self.bind("<Escape>", lambda e: self._on_cancel())
-    
-    def _on_confirm(self):
-        self.confirmation_number = self.confirmation_entry.get().strip()
-        self.on_confirm(self.confirmation_number)
-        self.destroy()
-    
-    def _on_cancel(self):
-        self.on_confirm(None)  # None indicates cancellation
-        self.destroy()
 
 if __name__ == "__main__":
     app = MainWindow()
