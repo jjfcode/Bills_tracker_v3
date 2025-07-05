@@ -52,7 +52,7 @@ class ReminderService:
         """Stop the reminder service."""
         self.running = False
         if self.thread and self.thread.is_alive():
-            self.thread.join(timeout=5)
+            self.thread.join(timeout=1)
         logger.info("Reminder service stopped")
         
     def _run(self):

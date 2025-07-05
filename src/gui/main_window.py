@@ -2190,22 +2190,15 @@ class MainWindow(ctk.CTk):
     def _on_close(self):
         """Handle window close event"""
         try:
-            # Stop reminder service
+            # Stop reminder service with shorter timeout
             if hasattr(self, 'reminder_service'):
                 self.reminder_service.stop()
             
-            # Close all notifications
+            # Close all notifications quickly
             if hasattr(self, 'notification_manager'):
                 self.notification_manager.close_all_notifications()
             
-            # Cancel any pending after() calls to prevent invalid command errors
-            for after_id in self.tk.eval('after info').split():
-                if after_id.isdigit():
-                    try:
-                        self.after_cancel(int(after_id))
-                    except:
-                        pass
-            
+            # Quick cleanup - don't wait for all after() calls
             self.quit()
         except Exception as e:
             print(f"Error during close: {e}")
