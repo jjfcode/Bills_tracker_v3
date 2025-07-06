@@ -1,6 +1,7 @@
 import customtkinter as ctk
 import os
 from typing import Optional, Tuple
+from PIL import Image
 
 class IconManager:
     """
@@ -34,9 +35,11 @@ class IconManager:
         try:
             icon_file = os.path.join(self.icon_path, f"{icon_name}.png")
             if os.path.exists(icon_file):
-                return ctk.CTkImage(light_image=icon_file, dark_image=icon_file, size=size)
-        except Exception:
-            pass
+                # Load the image using PIL first
+                pil_image = Image.open(icon_file)
+                return ctk.CTkImage(light_image=pil_image, dark_image=pil_image, size=size)
+        except Exception as e:
+            print(f"Error loading icon {icon_name}: {e}")
         return None
     
     def get_button_with_icon(self, master, text: str, icon_name: str = None, 
