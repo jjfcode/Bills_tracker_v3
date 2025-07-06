@@ -1,3 +1,8 @@
 customtkinter>=5.2.0
 cryptography
-tkcalendar>=1.6.1 
+tkcalendar>=1.6.1
+
+# Testing dependencies
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-mock>=3.10.0 
