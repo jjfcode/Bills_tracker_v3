@@ -21,14 +21,25 @@ MAX_SERVICE_HOURS_LENGTH = 100
 MAX_MOBILE_APP_LENGTH = 200
 
 class ValidationError(Exception):
-    """Custom exception for validation errors."""
+    """
+    Custom exception for validation errors.
+
+    Attributes:
+        message (str): The error message.
+        field (str): The field associated with the error (optional).
+    """
     def __init__(self, message: str, field: str = None):
         self.message = message
         self.field = field
         super().__init__(self.message)
 
 class DataValidator:
-    """Comprehensive data validator for Bills Tracker."""
+    """
+    Comprehensive data validator for Bills Tracker.
+
+    Provides static methods to validate all fields and data types used in the application.
+    Returns detailed error messages for invalid input.
+    """
     
     @staticmethod
     def validate_bill_name(name: str) -> Tuple[bool, Optional[str]]:
@@ -36,7 +47,7 @@ class DataValidator:
         Validate bill name.
         
         Args:
-            name: Bill name to validate
+            name (str): Bill name to validate
             
         Returns:
             Tuple of (is_valid, error_message)
@@ -66,7 +77,7 @@ class DataValidator:
         Validate due date format and range.
         
         Args:
-            date_str: Date string to validate
+            date_str (str): Date string to validate
             
         Returns:
             Tuple of (is_valid, error_message)
@@ -100,7 +111,7 @@ class DataValidator:
         Validate billing cycle.
         
         Args:
-            cycle: Billing cycle to validate
+            cycle (str): Billing cycle to validate
             
         Returns:
             Tuple of (is_valid, error_message)
@@ -126,7 +137,7 @@ class DataValidator:
         Validate reminder days.
         
         Args:
-            days: Reminder days to validate
+            days (Union[str, int]): Reminder days to validate
             
         Returns:
             Tuple of (is_valid, error_message)
@@ -154,7 +165,7 @@ class DataValidator:
         Validate URL format and return cleaned URL.
         
         Args:
-            url: URL to validate
+            url (str): URL to validate
             
         Returns:
             Tuple of (is_valid, error_message, cleaned_url)
@@ -196,7 +207,7 @@ class DataValidator:
         Validate email format.
         
         Args:
-            email: Email to validate
+            email (str): Email to validate
             
         Returns:
             Tuple of (is_valid, error_message)
@@ -235,7 +246,7 @@ class DataValidator:
         Validate phone number format.
         
         Args:
-            phone: Phone number to validate
+            phone (str): Phone number to validate
             
         Returns:
             Tuple of (is_valid, error_message)
@@ -271,7 +282,7 @@ class DataValidator:
         Validate login information.
         
         Args:
-            login_info: Login information to validate
+            login_info (str): Login information to validate
             
         Returns:
             Tuple of (is_valid, error_message)
@@ -297,7 +308,7 @@ class DataValidator:
         Validate password (for display purposes, not security).
         
         Args:
-            password: Password to validate
+            password (str): Password to validate
             
         Returns:
             Tuple of (is_valid, error_message)
@@ -318,7 +329,7 @@ class DataValidator:
         Validate account number.
         
         Args:
-            account_number: Account number to validate
+            account_number (str): Account number to validate
             
         Returns:
             Tuple of (is_valid, error_message)
@@ -344,7 +355,7 @@ class DataValidator:
         Validate reference ID.
         
         Args:
-            reference_id: Reference ID to validate
+            reference_id (str): Reference ID to validate
             
         Returns:
             Tuple of (is_valid, error_message)
@@ -370,7 +381,7 @@ class DataValidator:
         Validate service hours.
         
         Args:
-            service_hours: Service hours to validate
+            service_hours (str): Service hours to validate
             
         Returns:
             Tuple of (is_valid, error_message)
@@ -396,7 +407,7 @@ class DataValidator:
         Validate mobile app information.
         
         Args:
-            mobile_app: Mobile app information to validate
+            mobile_app (str): Mobile app information to validate
             
         Returns:
             Tuple of (is_valid, error_message)
@@ -422,7 +433,7 @@ class DataValidator:
         Validate complete bill data.
         
         Args:
-            bill_data: Bill data dictionary to validate
+            bill_data (Dict[str, Any]): Bill data dictionary to validate
             
         Returns:
             Tuple of (is_valid, error_message, cleaned_data)
@@ -505,7 +516,7 @@ class DataValidator:
         Validate complete template data.
         
         Args:
-            template_data: Template data dictionary to validate
+            template_data (Dict[str, Any]): Template data dictionary to validate
             
         Returns:
             Tuple of (is_valid, error_message, cleaned_data)
@@ -575,20 +586,48 @@ class DataValidator:
 
 # Convenience functions for backward compatibility
 def validate_url(url: str) -> Optional[str]:
-    """Legacy URL validation function."""
+    """
+    Legacy URL validation function.
+
+    Args:
+        url (str): URL to validate.
+    Returns:
+        Optional[str]: Cleaned URL if valid, else None.
+    """
     is_valid, error_msg, cleaned_url = DataValidator.validate_url(url)
     return cleaned_url if is_valid else None
 
 def validate_email(email: str) -> Optional[str]:
-    """Legacy email validation function."""
+    """
+    Legacy email validation function.
+
+    Args:
+        email (str): Email to validate.
+    Returns:
+        Optional[str]: Cleaned email if valid, else None.
+    """
     is_valid, error_msg = DataValidator.validate_email(email)
     return email.strip().lower() if is_valid else None
 
 def validate_future_date(date_str: str) -> Tuple[bool, Optional[str]]:
-    """Legacy future date validation function."""
+    """
+    Legacy future date validation function.
+
+    Args:
+        date_str (str): Date string to validate.
+    Returns:
+        Tuple[bool, Optional[str]]: (is_valid, error_message)
+    """
     return DataValidator.validate_due_date(date_str)
 
 def validate_reminder_days(days_str: str) -> bool:
-    """Legacy reminder days validation function."""
+    """
+    Legacy reminder days validation function.
+
+    Args:
+        days_str (str): Reminder days string to validate.
+    Returns:
+        bool: True if valid, False otherwise.
+    """
     is_valid, error_msg = DataValidator.validate_reminder_days(days_str)
     return is_valid 

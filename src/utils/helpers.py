@@ -11,13 +11,13 @@ from .constants import DATE_FORMAT, EMAIL_REGEX, PHONE_REGEX
 
 def parse_amount(amount_str: str) -> Optional[float]:
     """
-    Parse amount string to float, handling various formats.
+    Parse amount string to float, handling various formats (e.g., $1,234.56, 1.234,56).
     
     Args:
-        amount_str: Amount string to parse
+        amount_str (str): Amount string to parse.
         
     Returns:
-        Parsed float value or None if invalid
+        Optional[float]: Parsed float value or None if invalid.
     """
     if not amount_str or not amount_str.strip():
         return None
@@ -55,13 +55,13 @@ def parse_amount(amount_str: str) -> Optional[float]:
 
 def format_amount(amount: Optional[float]) -> str:
     """
-    Format amount as currency string.
+    Format amount as currency string (e.g., $123.45).
     
     Args:
-        amount: Amount to format
+        amount (Optional[float]): Amount to format.
         
     Returns:
-        Formatted currency string
+        str: Formatted currency string.
     """
     if amount is None:
         return ""
@@ -70,14 +70,14 @@ def format_amount(amount: Optional[float]) -> str:
 
 def validate_date_range(start_date: str, end_date: str) -> Tuple[bool, Optional[str]]:
     """
-    Validate date range.
+    Validate that start_date is not after end_date and both are valid dates.
     
     Args:
-        start_date: Start date string
-        end_date: End date string
+        start_date (str): Start date string.
+        end_date (str): End date string.
         
     Returns:
-        Tuple of (is_valid, error_message)
+        Tuple[bool, Optional[str]]: (is_valid, error_message)
     """
     try:
         start = datetime.strptime(start_date, DATE_FORMAT)
@@ -93,13 +93,13 @@ def validate_date_range(start_date: str, end_date: str) -> Tuple[bool, Optional[
 
 def get_date_period_dates(period: str) -> Tuple[str, str]:
     """
-    Get start and end dates for a given period.
+    Get start and end dates for a given period (today, week, month, quarter, year).
     
     Args:
-        period: Period string (today, week, month, quarter, year)
+        period (str): Period string.
         
     Returns:
-        Tuple of (start_date, end_date) strings
+        Tuple[str, str]: (start_date, end_date) in YYYY-MM-DD format.
     """
     today = datetime.now()
     
@@ -141,11 +141,11 @@ def calculate_next_due_date(current_due_date: str, billing_cycle: str) -> str:
     Calculate next due date based on billing cycle.
     
     Args:
-        current_due_date: Current due date string
-        billing_cycle: Billing cycle string
+        current_due_date (str): Current due date string.
+        billing_cycle (str): Billing cycle string.
         
     Returns:
-        Next due date string
+        str: Next due date string.
     """
     try:
         current_date = datetime.strptime(current_due_date, DATE_FORMAT)
@@ -187,12 +187,12 @@ def export_to_csv(data: List[Dict[str, Any]], filename: str, fieldnames: List[st
     Export data to CSV file.
     
     Args:
-        data: List of dictionaries to export
-        filename: Output filename
-        fieldnames: List of field names to include
+        data (List[Dict[str, Any]]): List of dictionaries to export.
+        filename (str): Output filename.
+        fieldnames (List[str], optional): List of field names to include.
         
     Returns:
-        True if successful, False otherwise
+        bool: True if successful, False otherwise.
     """
     try:
         if not data:
@@ -216,10 +216,10 @@ def import_from_csv(filename: str) -> Tuple[List[Dict[str, Any]], List[str]]:
     Import data from CSV file.
     
     Args:
-        filename: Input filename
+        filename (str): Input filename.
         
     Returns:
-        Tuple of (data_list, error_messages)
+        Tuple[List[Dict[str, Any]], List[str]]: (data_list, error_messages)
     """
     data = []
     errors = []
@@ -247,10 +247,10 @@ def import_from_csv(filename: str) -> Tuple[List[Dict[str, Any]], List[str]]:
 
 def is_dark_mode() -> bool:
     """
-    Check if system is in dark mode.
+    Check if system is in dark mode using CustomTkinter.
     
     Returns:
-        True if dark mode is detected
+        bool: True if dark mode is detected, False otherwise.
     """
     try:
         import customtkinter as ctk
@@ -261,14 +261,14 @@ def is_dark_mode() -> bool:
 
 def get_urgency_color(due_date: str, reminder_days: int = 7) -> str:
     """
-    Get color based on bill urgency.
+    Get color based on bill urgency (overdue, urgent, or not urgent).
     
     Args:
-        due_date: Due date string
-        reminder_days: Number of days before due to show as urgent
+        due_date (str): Due date string.
+        reminder_days (int, optional): Number of days before due to show as urgent.
         
     Returns:
-        Color string for urgency level
+        str: Color string for urgency level.
     """
     try:
         from .constants import URGENT_COLOR, WARNING_COLOR, SUCCESS_COLOR

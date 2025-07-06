@@ -9,9 +9,20 @@ from ..utils.constants import *
 
 
 class ConfigManager:
-    """Manages application configuration and settings."""
+    """
+    Manages application configuration and settings.
+
+    Provides methods to get and set configuration values, persist settings, and manage app preferences.
+    Supports dot notation for nested keys and includes helpers for all major app settings.
+    """
     
     def __init__(self, config_file: str = "config.json"):
+        """
+        Initialize the ConfigManager.
+
+        Args:
+            config_file (str): Path to the configuration file.
+        """
         self.config_file = config_file
         self.config = self._load_default_config()
         self._load_config()
@@ -83,7 +94,15 @@ class ConfigManager:
             print(f"Error saving config: {e}")
     
     def get(self, key: str, default: Any = None) -> Any:
-        """Get configuration value by key (supports dot notation)."""
+        """
+        Get configuration value by key (supports dot notation).
+
+        Args:
+            key (str): The configuration key (dot notation supported).
+            default (Any): Default value if key is not found.
+        Returns:
+            Any: The configuration value or default.
+        """
         keys = key.split('.')
         value = self.config
         
@@ -95,7 +114,13 @@ class ConfigManager:
             return default
     
     def set(self, key: str, value: Any):
-        """Set configuration value by key (supports dot notation)."""
+        """
+        Set configuration value by key (supports dot notation).
+
+        Args:
+            key (str): The configuration key (dot notation supported).
+            value (Any): The value to set.
+        """
         keys = key.split('.')
         config = self.config
         
@@ -110,164 +135,364 @@ class ConfigManager:
         self._save_config()
     
     def get_theme(self) -> str:
-        """Get current theme."""
+        """
+        Get the current theme (e.g., 'light', 'dark', 'system').
+
+        Returns:
+            str: The current theme.
+        """
         return self.get("theme", "light")
     
     def set_theme(self, theme: str):
-        """Set theme."""
+        """
+        Set the current theme.
+
+        Args:
+            theme (str): The theme to set.
+        """
         self.set("theme", theme)
     
     def get_window_size(self) -> Dict[str, int]:
-        """Get window size."""
+        """
+        Get the window size settings.
+
+        Returns:
+            Dict[str, int]: Dictionary with 'width' and 'height'.
+        """
         return self.get("window_size", {"width": DEFAULT_WINDOW_WIDTH, "height": DEFAULT_WINDOW_HEIGHT})
     
     def set_window_size(self, width: int, height: int):
-        """Set window size."""
+        """
+        Set the window size.
+
+        Args:
+            width (int): Window width.
+            height (int): Window height.
+        """
         self.set("window_size", {"width": width, "height": height})
     
     def get_items_per_page(self) -> int:
-        """Get items per page setting."""
+        """
+        Get the number of items per page for pagination.
+
+        Returns:
+            int: Items per page.
+        """
         return self.get("pagination.items_per_page", DEFAULT_ITEMS_PER_PAGE)
     
     def set_items_per_page(self, items: int):
-        """Set items per page."""
+        """
+        Set the number of items per page for pagination.
+
+        Args:
+            items (int): Items per page.
+        """
         self.set("pagination.items_per_page", items)
     
     def get_notifications_enabled(self) -> bool:
-        """Get notifications enabled setting."""
+        """
+        Get whether notifications are enabled.
+
+        Returns:
+            bool: True if enabled, False otherwise.
+        """
         return self.get("notifications.enabled", True)
     
     def set_notifications_enabled(self, enabled: bool):
-        """Set notifications enabled."""
+        """
+        Set whether notifications are enabled.
+
+        Args:
+            enabled (bool): Enable or disable notifications.
+        """
         self.set("notifications.enabled", enabled)
     
     def get_check_interval(self) -> int:
-        """Get reminder check interval."""
+        """
+        Get the reminder check interval in seconds.
+
+        Returns:
+            int: Check interval in seconds.
+        """
         return self.get("notifications.check_interval", DEFAULT_REMINDER_CHECK_INTERVAL)
     
     def set_check_interval(self, interval: int):
-        """Set reminder check interval."""
+        """
+        Set the reminder check interval in seconds.
+
+        Args:
+            interval (int): Check interval in seconds.
+        """
         self.set("notifications.check_interval", interval)
     
     def get_auto_close_notifications(self) -> bool:
-        """Get auto close notifications setting."""
+        """
+        Get whether notifications auto-close.
+
+        Returns:
+            bool: True if auto-close is enabled.
+        """
         return self.get("notifications.auto_close", True)
     
     def set_auto_close_notifications(self, enabled: bool):
-        """Set auto close notifications."""
+        """
+        Set whether notifications auto-close.
+
+        Args:
+            enabled (bool): Enable or disable auto-close.
+        """
         self.set("notifications.auto_close", enabled)
     
     def get_notification_timeout(self) -> int:
-        """Get notification timeout."""
+        """
+        Get the notification timeout in seconds.
+
+        Returns:
+            int: Timeout in seconds.
+        """
         return self.get("notifications.timeout", DEFAULT_NOTIFICATION_TIMEOUT)
     
     def set_notification_timeout(self, timeout: int):
-        """Set notification timeout."""
+        """
+        Set the notification timeout in seconds.
+
+        Args:
+            timeout (int): Timeout in seconds.
+        """
         self.set("notifications.timeout", timeout)
     
     def get_auto_backup(self) -> bool:
-        """Get auto backup setting."""
+        """
+        Get whether auto-backup is enabled.
+
+        Returns:
+            bool: True if enabled.
+        """
         return self.get("backup.auto_backup", True)
     
     def set_auto_backup(self, enabled: bool):
-        """Set auto backup."""
+        """
+        Set whether auto-backup is enabled.
+
+        Args:
+            enabled (bool): Enable or disable auto-backup.
+        """
         self.set("backup.auto_backup", enabled)
     
     def get_backup_interval(self) -> int:
-        """Get backup interval in days."""
+        """
+        Get the backup interval in days.
+
+        Returns:
+            int: Backup interval in days.
+        """
         return self.get("backup.backup_interval_days", 7)
     
     def set_backup_interval(self, days: int):
-        """Set backup interval."""
+        """
+        Set the backup interval in days.
+
+        Args:
+            days (int): Backup interval in days.
+        """
         self.set("backup.backup_interval_days", days)
     
     def get_max_backups(self) -> int:
-        """Get maximum number of backups to keep."""
+        """
+        Get the maximum number of backups to keep.
+
+        Returns:
+            int: Maximum number of backups.
+        """
         return self.get("backup.max_backups", 10)
     
     def set_max_backups(self, max_backups: int):
-        """Set maximum number of backups."""
+        """
+        Set the maximum number of backups to keep.
+
+        Args:
+            max_backups (int): Maximum number of backups.
+        """
         self.set("backup.max_backups", max_backups)
     
     def get_auto_compact(self) -> bool:
-        """Get auto compact database setting."""
+        """
+        Get whether auto-compact is enabled for the database.
+
+        Returns:
+            bool: True if enabled.
+        """
         return self.get("database.auto_compact", True)
     
     def set_auto_compact(self, enabled: bool):
-        """Set auto compact database."""
+        """
+        Set whether auto-compact is enabled for the database.
+
+        Args:
+            enabled (bool): Enable or disable auto-compact.
+        """
         self.set("database.auto_compact", enabled)
     
     def get_compact_interval(self) -> int:
-        """Get database compact interval in days."""
+        """
+        Get the database compact interval in days.
+
+        Returns:
+            int: Compact interval in days.
+        """
         return self.get("database.compact_interval_days", 30)
     
     def set_compact_interval(self, days: int):
-        """Set database compact interval."""
+        """
+        Set the database compact interval in days.
+
+        Args:
+            days (int): Compact interval in days.
+        """
         self.set("database.compact_interval_days", days)
     
     def get_show_sidebar(self) -> bool:
-        """Get show sidebar setting."""
+        """
+        Get whether the sidebar is shown.
+
+        Returns:
+            bool: True if sidebar is shown.
+        """
         return self.get("ui.show_sidebar", True)
     
     def set_show_sidebar(self, show: bool):
-        """Set show sidebar."""
+        """
+        Set whether the sidebar is shown.
+
+        Args:
+            show (bool): Show or hide the sidebar.
+        """
         self.set("ui.show_sidebar", show)
     
     def get_sidebar_width(self) -> int:
-        """Get sidebar width."""
+        """
+        Get the sidebar width in pixels.
+
+        Returns:
+            int: Sidebar width in pixels.
+        """
         return self.get("ui.sidebar_width", 200)
     
     def set_sidebar_width(self, width: int):
-        """Set sidebar width."""
+        """
+        Set the sidebar width in pixels.
+
+        Args:
+            width (int): Sidebar width in pixels.
+        """
         self.set("ui.sidebar_width", width)
     
     def get_table_row_height(self) -> int:
-        """Get table row height."""
+        """
+        Get the table row height in pixels.
+
+        Returns:
+            int: Table row height in pixels.
+        """
         return self.get("ui.table_row_height", 30)
     
     def set_table_row_height(self, height: int):
-        """Set table row height."""
+        """
+        Set the table row height in pixels.
+
+        Args:
+            height (int): Table row height in pixels.
+        """
         self.set("ui.table_row_height", height)
     
     def get_alternating_colors(self) -> bool:
-        """Get alternating colors setting."""
+        """
+        Get whether alternating row colors are enabled.
+
+        Returns:
+            bool: True if alternating colors are enabled.
+        """
         return self.get("ui.alternating_colors", True)
     
     def set_alternating_colors(self, enabled: bool):
-        """Set alternating colors."""
+        """
+        Set whether alternating row colors are enabled.
+
+        Args:
+            enabled (bool): Enable or disable alternating colors.
+        """
         self.set("ui.alternating_colors", enabled)
     
     def get_export_format(self) -> str:
-        """Get default export format."""
+        """
+        Get the default export format (e.g., 'csv', 'excel').
+
+        Returns:
+            str: Export format.
+        """
         return self.get("export.default_format", "csv")
     
     def set_export_format(self, format_type: str):
-        """Set default export format."""
+        """
+        Set the default export format.
+
+        Args:
+            format_type (str): Export format (e.g., 'csv', 'excel').
+        """
         self.set("export.default_format", format_type)
     
     def get_export_headers(self) -> bool:
-        """Get include headers in export setting."""
+        """
+        Get whether to include headers in exports.
+
+        Returns:
+            bool: True if headers are included.
+        """
         return self.get("export.include_headers", True)
     
     def set_export_headers(self, include: bool):
-        """Set include headers in export."""
+        """
+        Set whether to include headers in exports.
+
+        Args:
+            include (bool): Include headers or not.
+        """
         self.set("export.include_headers", include)
     
     def get_export_date_format(self) -> str:
-        """Get export date format."""
+        """
+        Get the export date format string.
+
+        Returns:
+            str: Date format string.
+        """
         return self.get("export.date_format", DATE_FORMAT)
     
     def set_export_date_format(self, date_format: str):
-        """Set export date format."""
+        """
+        Set the export date format string.
+
+        Args:
+            date_format (str): Date format string.
+        """
         self.set("export.date_format", date_format)
     
     def reset_to_defaults(self):
-        """Reset configuration to defaults."""
+        """
+        Reset all configuration settings to their default values and save.
+        """
         self.config = self._load_default_config()
         self._save_config()
     
     def export_config(self, filename: str) -> bool:
-        """Export configuration to file."""
+        """
+        Export the current configuration to a file.
+
+        Args:
+            filename (str): Path to the export file.
+        Returns:
+            bool: True if export succeeded, False otherwise.
+        """
         try:
             with open(filename, 'w', encoding='utf-8') as f:
                 json.dump(self.config, f, indent=2, ensure_ascii=False)
@@ -277,7 +502,14 @@ class ConfigManager:
             return False
     
     def import_config(self, filename: str) -> bool:
-        """Import configuration from file."""
+        """
+        Import configuration from a file, merging with current settings.
+
+        Args:
+            filename (str): Path to the import file.
+        Returns:
+            bool: True if import succeeded, False otherwise.
+        """
         try:
             with open(filename, 'r', encoding='utf-8') as f:
                 imported_config = json.load(f)

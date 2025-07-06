@@ -18,11 +18,21 @@ from ..utils.constants import DATE_FORMAT
 
 
 class BillService:
-    """Service for bill-related business logic."""
+    """
+    Service for bill-related business logic.
+
+    Provides methods for retrieving, searching, creating, updating, deleting, and renewing bills.
+    All methods are static and operate on the database via the data access layer.
+    """
     
     @staticmethod
     def get_all_bills() -> List[Dict[str, Any]]:
-        """Get all bills with enhanced data."""
+        """
+        Retrieve all bills from the database, adding computed fields for UI display.
+
+        Returns:
+            List[Dict[str, Any]]: List of bills with urgency color, formatted amount, and status flags.
+        """
         bills = fetch_all_bills()
         
         # Add computed fields
@@ -39,7 +49,14 @@ class BillService:
     
     @staticmethod
     def get_bills_by_period(period: str) -> List[Dict[str, Any]]:
-        """Get bills filtered by time period."""
+        """
+        Retrieve bills filtered by a time period (e.g., 'month', 'year').
+
+        Args:
+            period (str): The period to filter by (today, week, month, quarter, year).
+        Returns:
+            List[Dict[str, Any]]: Filtered list of bills.
+        """
         start_date, end_date = get_date_period_dates(period)
         all_bills = BillService.get_all_bills()
         
@@ -59,7 +76,14 @@ class BillService:
     
     @staticmethod
     def get_bills_by_category(category_id: Optional[int]) -> List[Dict[str, Any]]:
-        """Get bills filtered by category."""
+        """
+        Retrieve bills filtered by category.
+
+        Args:
+            category_id (Optional[int]): The category ID to filter by, or None for all.
+        Returns:
+            List[Dict[str, Any]]: Filtered list of bills.
+        """
         all_bills = BillService.get_all_bills()
         
         if category_id is None:
@@ -69,7 +93,15 @@ class BillService:
     
     @staticmethod
     def search_bills(query: str, search_field: str = "name") -> List[Dict[str, Any]]:
-        """Search bills by query and field."""
+        """
+        Search bills by a query string and field.
+
+        Args:
+            query (str): The search query.
+            search_field (str): The field to search in (default: 'name').
+        Returns:
+            List[Dict[str, Any]]: Filtered list of bills matching the query.
+        """
         if not query.strip():
             return BillService.get_all_bills()
         
@@ -86,7 +118,14 @@ class BillService:
     
     @staticmethod
     def create_bill(bill_data: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
-        """Create a new bill with validation."""
+        """
+        Create a new bill after validating the input data.
+
+        Args:
+            bill_data (Dict[str, Any]): The bill data to create.
+        Returns:
+            Tuple[bool, Optional[str]]: (success, error message if any)
+        """
         # Validate bill data
         is_valid, error_msg, cleaned_data = DataValidator.validate_bill_data(bill_data)
         if not is_valid:
@@ -106,7 +145,15 @@ class BillService:
     
     @staticmethod
     def update_bill(bill_id: int, bill_data: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
-        """Update an existing bill with validation."""
+        """
+        Update an existing bill after validating the input data.
+
+        Args:
+            bill_id (int): The ID of the bill to update.
+            bill_data (Dict[str, Any]): The updated bill data.
+        Returns:
+            Tuple[bool, Optional[str]]: (success, error message if any)
+        """
         # Validate bill data
         is_valid, error_msg, cleaned_data = DataValidator.validate_bill_data(bill_data)
         if not is_valid:
@@ -126,7 +173,14 @@ class BillService:
     
     @staticmethod
     def delete_bill(bill_id: int) -> Tuple[bool, Optional[str]]:
-        """Delete a bill."""
+        """
+        Delete a bill by its ID.
+
+        Args:
+            bill_id (int): The ID of the bill to delete.
+        Returns:
+            Tuple[bool, Optional[str]]: (success, error message if any)
+        """
         try:
             delete_bill(bill_id)
             return True, None
@@ -135,7 +189,14 @@ class BillService:
     
     @staticmethod
     def bulk_delete_bills(bill_ids: List[int]) -> Tuple[bool, Optional[str]]:
-        """Delete multiple bills."""
+        """
+        Delete multiple bills by their IDs.
+
+        Args:
+            bill_ids (List[int]): List of bill IDs to delete.
+        Returns:
+            Tuple[bool, Optional[str]]: (success, error message if any)
+        """
         success_count = 0
         failed_ids = []
         
@@ -153,7 +214,15 @@ class BillService:
     
     @staticmethod
     def toggle_paid_status(bill_id: int, current_paid: bool) -> Tuple[bool, Optional[str]]:
-        """Toggle the paid status of a bill."""
+        """
+        Toggle the paid status of a bill.
+
+        Args:
+            bill_id (int): The ID of the bill.
+            current_paid (bool): The current paid status.
+        Returns:
+            Tuple[bool, Optional[str]]: (success, error message if any)
+        """
         try:
             update_bill(bill_id, {'paid': not current_paid})
             return True, None
@@ -162,7 +231,14 @@ class BillService:
     
     @staticmethod
     def renew_bill(bill_id: int) -> Tuple[bool, Optional[str]]:
-        """Renew a bill by calculating the next due date."""
+        """
+        Renew a bill by calculating and setting the next due date.
+
+        Args:
+            bill_id (int): The ID of the bill to renew.
+        Returns:
+            Tuple[bool, Optional[str]]: (success, error message if any)
+        """
         try:
             # Get current bill data
             all_bills = fetch_all_bills()
@@ -189,7 +265,14 @@ class BillService:
     
     @staticmethod
     def _is_bill_overdue(due_date: str) -> bool:
-        """Check if a bill is overdue."""
+        """
+        Check if a bill is overdue based on its due date.
+
+        Args:
+            due_date (str): The due date string (YYYY-MM-DD).
+        Returns:
+            bool: True if overdue, False otherwise.
+        """
         try:
             due = datetime.strptime(due_date, DATE_FORMAT)
             today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -199,7 +282,15 @@ class BillService:
     
     @staticmethod
     def _is_bill_urgent(due_date: str, reminder_days: int) -> bool:
-        """Check if a bill is urgent (due within reminder days)."""
+        """
+        Check if a bill is urgent (due within reminder days).
+
+        Args:
+            due_date (str): The due date string (YYYY-MM-DD).
+            reminder_days (int): Number of days before due to consider urgent.
+        Returns:
+            bool: True if urgent, False otherwise.
+        """
         try:
             due = datetime.strptime(due_date, DATE_FORMAT)
             today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -210,16 +301,32 @@ class BillService:
 
 
 class CategoryService:
-    """Service for category-related business logic."""
+    """
+    Service for category-related business logic.
+
+    Provides methods for retrieving, creating, updating, and deleting categories.
+    """
     
     @staticmethod
     def get_all_categories() -> List[Dict[str, Any]]:
-        """Get all categories."""
+        """
+        Retrieve all categories from the database.
+
+        Returns:
+            List[Dict[str, Any]]: List of categories.
+        """
         return fetch_all_categories()
     
     @staticmethod
     def create_category(category_data: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
-        """Create a new category with validation."""
+        """
+        Create a new category after validating the input data.
+
+        Args:
+            category_data (Dict[str, Any]): The category data to create.
+        Returns:
+            Tuple[bool, Optional[str]]: (success, error message if any)
+        """
         # Validate category data
         is_valid, error_msg, cleaned_data = DataValidator.validate_category_data(category_data)
         if not is_valid:
@@ -233,7 +340,15 @@ class CategoryService:
     
     @staticmethod
     def update_category(category_id: int, category_data: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
-        """Update an existing category with validation."""
+        """
+        Update an existing category after validating the input data.
+
+        Args:
+            category_id (int): The ID of the category to update.
+            category_data (Dict[str, Any]): The updated category data.
+        Returns:
+            Tuple[bool, Optional[str]]: (success, error message if any)
+        """
         # Validate category data
         is_valid, error_msg, cleaned_data = DataValidator.validate_category_data(category_data)
         if not is_valid:
@@ -247,7 +362,14 @@ class CategoryService:
     
     @staticmethod
     def delete_category(category_id: int) -> Tuple[bool, Optional[str]]:
-        """Delete a category."""
+        """
+        Delete a category by its ID.
+
+        Args:
+            category_id (int): The ID of the category to delete.
+        Returns:
+            Tuple[bool, Optional[str]]: (success, error message if any)
+        """
         try:
             delete_category(category_id)
             return True, None
@@ -256,20 +378,38 @@ class CategoryService:
 
 
 class PaymentMethodService:
-    """Service for payment method-related business logic."""
+    """
+    Service for payment method-related business logic.
+
+    Provides methods for retrieving payment methods.
+    """
     
     @staticmethod
     def get_all_payment_methods() -> List[Dict[str, Any]]:
-        """Get all payment methods."""
+        """
+        Retrieve all payment methods from the database.
+
+        Returns:
+            List[Dict[str, Any]]: List of payment methods.
+        """
         return fetch_all_payment_methods()
 
 
 class AnalyticsService:
-    """Service for analytics and reporting."""
+    """
+    Service for analytics and reporting.
+
+    Provides methods for generating bill statistics and monthly summaries.
+    """
     
     @staticmethod
     def get_bill_statistics() -> Dict[str, Any]:
-        """Get comprehensive bill statistics."""
+        """
+        Get comprehensive statistics about bills, including totals, paid/unpaid counts, overdue/urgent counts, and category breakdowns.
+
+        Returns:
+            Dict[str, Any]: Dictionary of statistics.
+        """
         bills = BillService.get_all_bills()
         
         total_bills = len(bills)
@@ -314,7 +454,15 @@ class AnalyticsService:
     
     @staticmethod
     def get_monthly_summary(year: int, month: int) -> Dict[str, Any]:
-        """Get monthly bill summary."""
+        """
+        Get a summary of bills for a specific month and year.
+
+        Args:
+            year (int): The year of the summary.
+            month (int): The month of the summary (1-12).
+        Returns:
+            Dict[str, Any]: Dictionary of monthly summary statistics.
+        """
         start_date = datetime(year, month, 1)
         if month == 12:
             end_date = datetime(year + 1, 1, 1) - timedelta(days=1)

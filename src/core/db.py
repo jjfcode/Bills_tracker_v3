@@ -76,11 +76,21 @@ CREATE TABLE IF NOT EXISTS templates (
 '''
 
 def get_db_connection():
+    """
+    Create and return a new SQLite database connection.
+
+    Returns:
+        sqlite3.Connection: SQLite connection object with row factory set.
+    """
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     return conn
 
 def initialize_database():
+    """
+    Initialize the database schema and insert default categories and payment methods if not present.
+    Creates all required tables for bills, categories, payment methods, templates, and authentication (if available).
+    """
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(CATEGORIES_SCHEMA)
@@ -139,7 +149,13 @@ def initialize_database():
     conn.close()
 
 def fetch_all_bills():
-    """Fetch all bills from the database and return as a list of dicts."""
+    """
+    Fetch all bills from the database and return as a list of dicts.
+    Joins with categories and payment methods for display fields.
+
+    Returns:
+        List[dict]: List of bill records with category and payment method info.
+    """
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('''
@@ -165,7 +181,12 @@ def fetch_all_bills():
     return bills
 
 def insert_bill(bill_data):
-    """Insert a new bill into the database. bill_data is a dict."""
+    """
+    Insert a new bill into the database.
+
+    Args:
+        bill_data (dict): Dictionary of bill fields.
+    """
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('''
@@ -200,7 +221,13 @@ def insert_bill(bill_data):
     conn.close()
 
 def update_bill(bill_id, bill_data):
-    """Update a bill in the database by id. bill_data is a dict."""
+    """
+    Update a bill in the database by id.
+
+    Args:
+        bill_id (int): The bill ID to update.
+        bill_data (dict): Dictionary of updated bill fields.
+    """
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('''
@@ -253,7 +280,12 @@ def update_bill(bill_id, bill_data):
     conn.close()
 
 def delete_bill(bill_id):
-    """Delete a bill from the database by id."""
+    """
+    Delete a bill from the database by id.
+
+    Args:
+        bill_id (int): The bill ID to delete.
+    """
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('DELETE FROM bills WHERE id = ?', (bill_id,))
@@ -262,7 +294,12 @@ def delete_bill(bill_id):
 
 # Category functions
 def fetch_all_categories():
-    """Fetch all categories from the database and return as a list of dicts."""
+    """
+    Fetch all categories from the database and return as a list of dicts.
+
+    Returns:
+        List[dict]: List of category records.
+    """
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM categories ORDER BY name')
@@ -272,7 +309,12 @@ def fetch_all_categories():
     return categories
 
 def insert_category(category_data):
-    """Insert a new category into the database. category_data is a dict."""
+    """
+    Insert a new category into the database.
+
+    Args:
+        category_data (dict): Dictionary of category fields.
+    """
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('''
@@ -287,7 +329,13 @@ def insert_category(category_data):
     conn.close()
 
 def update_category(category_id, category_data):
-    """Update a category in the database by id. category_data is a dict."""
+    """
+    Update a category in the database by id.
+
+    Args:
+        category_id (int): The category ID to update.
+        category_data (dict): Dictionary of updated category fields.
+    """
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('''
@@ -306,7 +354,12 @@ def update_category(category_id, category_data):
     conn.close()
 
 def delete_category(category_id):
-    """Delete a category from the database by id."""
+    """
+    Delete a category from the database by id.
+
+    Args:
+        category_id (int): The category ID to delete.
+    """
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('DELETE FROM categories WHERE id = ?', (category_id,))
@@ -314,7 +367,14 @@ def delete_category(category_id):
     conn.close()
 
 def get_category_name(category_id):
-    """Get category name by id."""
+    """
+    Get category name by id.
+
+    Args:
+        category_id (int): The category ID.
+    Returns:
+        str: Category name, or 'Uncategorized' if not found.
+    """
     if not category_id:
         return "Uncategorized"
     conn = get_db_connection()
@@ -326,7 +386,12 @@ def get_category_name(category_id):
 
 # Payment method functions
 def fetch_all_payment_methods():
-    """Fetch all payment methods from the database and return as a list of dicts."""
+    """
+    Fetch all payment methods from the database and return as a list of dicts.
+
+    Returns:
+        List[dict]: List of payment method records.
+    """
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM payment_methods ORDER BY name')
@@ -340,7 +405,12 @@ def fetch_all_payment_methods():
     return payment_methods
 
 def insert_payment_method(payment_method_data):
-    """Insert a new payment method into the database. payment_method_data is a dict."""
+    """
+    Insert a new payment method into the database.
+
+    Args:
+        payment_method_data (dict): Dictionary of payment method fields.
+    """
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('''
@@ -355,7 +425,13 @@ def insert_payment_method(payment_method_data):
     conn.close()
 
 def update_payment_method(payment_method_id, payment_method_data):
-    """Update a payment method in the database by id. payment_method_data is a dict."""
+    """
+    Update a payment method in the database by id.
+
+    Args:
+        payment_method_id (int): The payment method ID to update.
+        payment_method_data (dict): Dictionary of updated payment method fields.
+    """
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('''
@@ -374,7 +450,12 @@ def update_payment_method(payment_method_id, payment_method_data):
     conn.close()
 
 def delete_payment_method(payment_method_id):
-    """Delete a payment method from the database by id."""
+    """
+    Delete a payment method from the database by id.
+
+    Args:
+        payment_method_id (int): The payment method ID to delete.
+    """
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('DELETE FROM payment_methods WHERE id = ?', (payment_method_id,))
@@ -382,7 +463,14 @@ def delete_payment_method(payment_method_id):
     conn.close()
 
 def get_payment_method_name(payment_method_id):
-    """Get payment method name by id."""
+    """
+    Get payment method name by id.
+
+    Args:
+        payment_method_id (int): The payment method ID.
+    Returns:
+        str: Payment method name, or 'Not Set' if not found.
+    """
     if not payment_method_id:
         return "Not Set"
     conn = get_db_connection()
@@ -393,7 +481,12 @@ def get_payment_method_name(payment_method_id):
     return row['name'] if row else "Not Set"
 
 def get_payment_methods_with_bill_count():
-    """Get payment methods with count of bills using each method."""
+    """
+    Get payment methods with count of bills using each method.
+
+    Returns:
+        List[dict]: List of payment methods with bill counts.
+    """
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute('''

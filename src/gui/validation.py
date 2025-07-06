@@ -3,14 +3,30 @@ from datetime import datetime, date
 from typing import Dict, List, Tuple, Optional
 
 class ValidationError(Exception):
-    """Custom exception for validation errors"""
+    """
+    Custom exception for validation errors.
+    
+    Provides structured error information with field name and error message.
+    """
     def __init__(self, field: str, message: str):
+        """
+        Initialize the ValidationError.
+        
+        Args:
+            field (str): The name of the field that failed validation.
+            message (str): The error message describing the validation failure.
+        """
         self.field = field
         self.message = message
         super().__init__(f"{field}: {message}")
 
 class BillValidator:
-    """Comprehensive validator for bill data"""
+    """
+    Comprehensive validator for bill data.
+    
+    Provides validation methods for all bill fields including required fields,
+    format validation, length constraints, and business rule validation.
+    """
     
     # Validation patterns
     EMAIL_REGEX = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
@@ -43,14 +59,37 @@ class BillValidator:
     
     @classmethod
     def validate_required_field(cls, value: str, field_name: str) -> str:
-        """Validate that a required field is not empty"""
+        """
+        Validate that a required field is not empty.
+        
+        Args:
+            value (str): The field value to validate.
+            field_name (str): The name of the field for error messages.
+            
+        Returns:
+            str: The trimmed value if valid.
+            
+        Raises:
+            ValidationError: If the field is empty or contains only whitespace.
+        """
         if not value or not value.strip():
             raise ValidationError(field_name, f"{field_name} is required and cannot be empty")
         return value.strip()
     
     @classmethod
     def validate_name(cls, name: str) -> str:
-        """Validate bill name"""
+        """
+        Validate bill name with length and character constraints.
+        
+        Args:
+            name (str): The bill name to validate.
+            
+        Returns:
+            str: The validated name.
+            
+        Raises:
+            ValidationError: If the name is invalid.
+        """
         name = cls.validate_required_field(name, "Name")
         
         if len(name) > cls.MAX_NAME_LENGTH:
@@ -64,7 +103,19 @@ class BillValidator:
     
     @classmethod
     def validate_date(cls, date_str: str, field_name: str = "Due Date") -> str:
-        """Validate date format and ensure it's a valid date"""
+        """
+        Validate date format and ensure it's a valid date within reasonable bounds.
+        
+        Args:
+            date_str (str): The date string to validate in YYYY-MM-DD format.
+            field_name (str): The name of the field for error messages (default: "Due Date").
+            
+        Returns:
+            str: The validated date string.
+            
+        Raises:
+            ValidationError: If the date is invalid or out of bounds.
+        """
         date_str = cls.validate_required_field(date_str, field_name)
         
         # Check format
@@ -92,7 +143,19 @@ class BillValidator:
     
     @classmethod
     def validate_email(cls, email: str, required: bool = False) -> Optional[str]:
-        """Validate email format"""
+        """
+        Validate email format using regex pattern.
+        
+        Args:
+            email (str): The email address to validate.
+            required (bool): Whether the field is required (default: False).
+            
+        Returns:
+            Optional[str]: The validated email or None if empty and not required.
+            
+        Raises:
+            ValidationError: If the email format is invalid.
+        """
         if not email or not email.strip():
             if required:
                 raise ValidationError("Email", "Email is required")
@@ -110,7 +173,19 @@ class BillValidator:
     
     @classmethod
     def validate_phone(cls, phone: str, required: bool = False) -> Optional[str]:
-        """Validate phone number format"""
+        """
+        Validate phone number format and ensure it contains digits.
+        
+        Args:
+            phone (str): The phone number to validate.
+            required (bool): Whether the field is required (default: False).
+            
+        Returns:
+            Optional[str]: The validated phone number or None if empty and not required.
+            
+        Raises:
+            ValidationError: If the phone number format is invalid.
+        """
         if not phone or not phone.strip():
             if required:
                 raise ValidationError("Phone", "Phone number is required")
@@ -132,7 +207,19 @@ class BillValidator:
     
     @classmethod
     def validate_url(cls, url: str, required: bool = False) -> Optional[str]:
-        """Validate web page URL"""
+        """
+        Validate web page URL format.
+        
+        Args:
+            url (str): The URL to validate.
+            required (bool): Whether the field is required (default: False).
+            
+        Returns:
+            Optional[str]: The validated URL or None if empty and not required.
+            
+        Raises:
+            ValidationError: If the URL format is invalid.
+        """
         if not url or not url.strip():
             if required:
                 raise ValidationError("Web Page", "Web page URL is required")
@@ -150,7 +237,19 @@ class BillValidator:
     
     @classmethod
     def validate_account_number(cls, account_number: str, required: bool = False) -> Optional[str]:
-        """Validate account number format"""
+        """
+        Validate account number format.
+        
+        Args:
+            account_number (str): The account number to validate.
+            required (bool): Whether the field is required (default: False).
+            
+        Returns:
+            Optional[str]: The validated account number or None if empty and not required.
+            
+        Raises:
+            ValidationError: If the account number format is invalid.
+        """
         if not account_number or not account_number.strip():
             if required:
                 raise ValidationError("Account Number", "Account number is required")
@@ -168,7 +267,19 @@ class BillValidator:
     
     @classmethod
     def validate_reference_id(cls, reference_id: str, required: bool = False) -> Optional[str]:
-        """Validate reference ID format"""
+        """
+        Validate reference ID format.
+        
+        Args:
+            reference_id (str): The reference ID to validate.
+            required (bool): Whether the field is required (default: False).
+            
+        Returns:
+            Optional[str]: The validated reference ID or None if empty and not required.
+            
+        Raises:
+            ValidationError: If the reference ID format is invalid.
+        """
         if not reference_id or not reference_id.strip():
             if required:
                 raise ValidationError("Reference ID", "Reference ID is required")
@@ -186,7 +297,19 @@ class BillValidator:
     
     @classmethod
     def validate_confirmation_number(cls, confirmation_number: str, required: bool = False) -> Optional[str]:
-        """Validate confirmation number format"""
+        """
+        Validate confirmation number format.
+        
+        Args:
+            confirmation_number (str): The confirmation number to validate.
+            required (bool): Whether the field is required (default: False).
+            
+        Returns:
+            Optional[str]: The validated confirmation number or None if empty and not required.
+            
+        Raises:
+            ValidationError: If the confirmation number format is invalid.
+        """
         if not confirmation_number or not confirmation_number.strip():
             if required:
                 raise ValidationError("Confirmation Number", "Confirmation number is required")
@@ -204,7 +327,19 @@ class BillValidator:
     
     @classmethod
     def validate_billing_cycle(cls, billing_cycle: str, required: bool = False) -> Optional[str]:
-        """Validate billing cycle"""
+        """
+        Validate billing cycle against predefined valid values.
+        
+        Args:
+            billing_cycle (str): The billing cycle to validate.
+            required (bool): Whether the field is required (default: False).
+            
+        Returns:
+            Optional[str]: The validated billing cycle or None if empty and not required.
+            
+        Raises:
+            ValidationError: If the billing cycle is not in the valid list.
+        """
         if not billing_cycle or not billing_cycle.strip():
             if required:
                 raise ValidationError("Billing Cycle", "Billing cycle is required")
@@ -219,7 +354,19 @@ class BillValidator:
     
     @classmethod
     def validate_reminder_days(cls, reminder_days: int, required: bool = False) -> Optional[int]:
-        """Validate reminder days"""
+        """
+        Validate reminder days against predefined valid values.
+        
+        Args:
+            reminder_days (int): The reminder days value to validate.
+            required (bool): Whether the field is required (default: False).
+            
+        Returns:
+            Optional[int]: The validated reminder days or None if empty and not required.
+            
+        Raises:
+            ValidationError: If the reminder days is not in the valid list.
+        """
         if reminder_days is None:
             if required:
                 raise ValidationError("Reminder Days", "Reminder days is required")
@@ -238,7 +385,19 @@ class BillValidator:
     
     @classmethod
     def validate_login_info(cls, login_info: str, required: bool = False) -> Optional[str]:
-        """Validate login information"""
+        """
+        Validate login information field.
+        
+        Args:
+            login_info (str): The login information to validate.
+            required (bool): Whether the field is required (default: False).
+            
+        Returns:
+            Optional[str]: The validated login info or None if empty and not required.
+            
+        Raises:
+            ValidationError: If the login info exceeds length limit.
+        """
         if not login_info or not login_info.strip():
             if required:
                 raise ValidationError("Login Info", "Login information is required")
@@ -253,7 +412,19 @@ class BillValidator:
     
     @classmethod
     def validate_password(cls, password: str, required: bool = False) -> Optional[str]:
-        """Validate password field"""
+        """
+        Validate password field.
+        
+        Args:
+            password (str): The password to validate.
+            required (bool): Whether the field is required (default: False).
+            
+        Returns:
+            Optional[str]: The validated password or None if empty and not required.
+            
+        Raises:
+            ValidationError: If the password exceeds length limit.
+        """
         if not password or not password.strip():
             if required:
                 raise ValidationError("Password", "Password is required")
@@ -268,7 +439,19 @@ class BillValidator:
     
     @classmethod
     def validate_customer_service_hours(cls, hours: str, required: bool = False) -> Optional[str]:
-        """Validate customer service hours"""
+        """
+        Validate customer service hours field.
+        
+        Args:
+            hours (str): The customer service hours to validate.
+            required (bool): Whether the field is required (default: False).
+            
+        Returns:
+            Optional[str]: The validated hours or None if empty and not required.
+            
+        Raises:
+            ValidationError: If the hours exceed length limit.
+        """
         if not hours or not hours.strip():
             if required:
                 raise ValidationError("Customer Service Hours", "Customer service hours are required")
@@ -283,7 +466,19 @@ class BillValidator:
     
     @classmethod
     def validate_mobile_app(cls, mobile_app: str, required: bool = False) -> Optional[str]:
-        """Validate mobile app field"""
+        """
+        Validate mobile app field.
+        
+        Args:
+            mobile_app (str): The mobile app information to validate.
+            required (bool): Whether the field is required (default: False).
+            
+        Returns:
+            Optional[str]: The validated mobile app info or None if empty and not required.
+            
+        Raises:
+            ValidationError: If the mobile app info exceeds length limit.
+        """
         if not mobile_app or not mobile_app.strip():
             if required:
                 raise ValidationError("Mobile App", "Mobile app information is required")
@@ -298,7 +493,18 @@ class BillValidator:
     
     @classmethod
     def validate_bill_data(cls, bill_data: Dict) -> Dict[str, any]:
-        """Validate complete bill data"""
+        """
+        Validate complete bill data dictionary.
+        
+        Args:
+            bill_data (Dict): Dictionary containing all bill fields to validate.
+            
+        Returns:
+            Dict[str, any]: Dictionary with validated bill data.
+            
+        Raises:
+            ValidationError: If any field fails validation.
+        """
         errors = []
         validated_data = {}
         
@@ -338,14 +544,29 @@ class BillValidator:
         return validated_data
 
 class CategoryValidator:
-    """Validator for category data"""
+    """
+    Validator for category data.
+    
+    Provides validation methods for category fields including name, color, and description.
+    """
     
     MAX_NAME_LENGTH = 50
     MAX_DESCRIPTION_LENGTH = 200
     
     @classmethod
     def validate_name(cls, name: str) -> str:
-        """Validate category name"""
+        """
+        Validate category name with length and character constraints.
+        
+        Args:
+            name (str): The category name to validate.
+            
+        Returns:
+            str: The validated category name.
+            
+        Raises:
+            ValidationError: If the category name is invalid.
+        """
         name = BillValidator.validate_required_field(name, "Name")
         
         if len(name) > cls.MAX_NAME_LENGTH:
@@ -359,7 +580,18 @@ class CategoryValidator:
     
     @classmethod
     def validate_color(cls, color: str) -> str:
-        """Validate hex color format"""
+        """
+        Validate hex color format.
+        
+        Args:
+            color (str): The color to validate in #RRGGBB format.
+            
+        Returns:
+            str: The validated color in uppercase.
+            
+        Raises:
+            ValidationError: If the color format is invalid.
+        """
         color = BillValidator.validate_required_field(color, "Color")
         
         if not re.match(r'^#[0-9A-Fa-f]{6}$', color):
@@ -369,7 +601,19 @@ class CategoryValidator:
     
     @classmethod
     def validate_description(cls, description: str, required: bool = False) -> Optional[str]:
-        """Validate category description"""
+        """
+        Validate category description.
+        
+        Args:
+            description (str): The description to validate.
+            required (bool): Whether the field is required (default: False).
+            
+        Returns:
+            Optional[str]: The validated description or None if empty and not required.
+            
+        Raises:
+            ValidationError: If the description exceeds length limit.
+        """
         if not description or not description.strip():
             if required:
                 raise ValidationError("Description", "Description is required")
@@ -384,7 +628,18 @@ class CategoryValidator:
     
     @classmethod
     def validate_category_data(cls, category_data: Dict) -> Dict[str, any]:
-        """Validate complete category data"""
+        """
+        Validate complete category data dictionary.
+        
+        Args:
+            category_data (Dict): Dictionary containing all category fields to validate.
+            
+        Returns:
+            Dict[str, any]: Dictionary with validated category data.
+            
+        Raises:
+            ValidationError: If any field fails validation.
+        """
         errors = []
         validated_data = {}
         
@@ -403,15 +658,22 @@ class CategoryValidator:
 
 def validate_field_in_real_time(value: str, field_type: str, required: bool = False) -> Tuple[bool, str]:
     """
-    Validate a field in real-time and return (is_valid, error_message)
+    Validate a field in real-time and return validation result.
+    
+    This function is designed for use in GUI forms to provide immediate feedback
+    to users as they type. It supports all field types used in the application.
     
     Args:
-        value: The field value to validate
-        field_type: Type of field ('name', 'email', 'phone', 'url', 'account_number', etc.)
-        required: Whether the field is required
+        value (str): The field value to validate.
+        field_type (str): Type of field ('name', 'email', 'phone', 'url', 'account_number', 
+                         'reference_id', 'confirmation_number', 'date', 'billing_cycle', 
+                         'reminder_days', 'category_name', 'color').
+        required (bool): Whether the field is required (default: False).
     
     Returns:
-        Tuple of (is_valid, error_message)
+        Tuple[bool, str]: A tuple containing (is_valid, error_message).
+                         is_valid is True if validation passes, False otherwise.
+                         error_message is empty string if valid, error description if invalid.
     """
     try:
         if field_type == 'name':
@@ -448,8 +710,5 @@ def validate_field_in_real_time(value: str, field_type: str, required: bool = Fa
                 return False, f"{field_type.title()} is required"
         
         return True, ""
-        
     except ValidationError as e:
-        return False, str(e)
-    except Exception as e:
-        return False, f"Validation error: {str(e)}" 
+        return False, str(e) 

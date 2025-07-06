@@ -43,6 +43,15 @@ SPACING_MD = 16
 SPACING_LG = 24
 
 def show_popup(master, title, message, color="green"):
+    """
+    Display a popup dialog with a message.
+
+    Args:
+        master: The parent window for the popup.
+        title (str): The title of the popup window.
+        message (str): The message to display in the popup.
+        color (str): The color of the message text (default: "green").
+    """
     try:
         popup = ctk.CTkToplevel(master)
         popup.title(title)
@@ -79,14 +88,29 @@ EMAIL_REGEX = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
 PHONE_REGEX = r"^[\d\-\+\(\)\s]+$"
 
 class DateSelectorFrame(ctk.CTkFrame):
-    """Custom frame for date selection with calendar and quick options"""
+    """
+    Custom frame for date selection with calendar and quick options.
+
+    Provides a date entry field with a calendar button for easy date selection.
+    Supports both calendar dialog and fallback simple date picker.
+    """
     
     def __init__(self, master, **kwargs):
+        """
+        Initialize the DateSelectorFrame.
+
+        Args:
+            master: The parent widget.
+            **kwargs: Additional keyword arguments for CTkFrame.
+        """
         super().__init__(master, **kwargs)
         self.selected_date = StringVar()
         self._setup_ui()
     
     def _setup_ui(self):
+        """
+        Setup the date selector UI with entry field and calendar button.
+        """
         # Main date entry with calendar button
         date_frame = ctk.CTkFrame(self)
         date_frame.pack(fill="x", padx=SPACING_SM, pady=SPACING_SM)
@@ -100,7 +124,10 @@ class DateSelectorFrame(ctk.CTkFrame):
         self.calendar_btn.pack(side="right")
     
     def _show_calendar(self):
-        """Show calendar dialog for date selection"""
+        """
+        Show calendar dialog for date selection using tkcalendar.
+        Falls back to simple date picker if tkcalendar is not available.
+        """
         try:
             # Create calendar dialog
             calendar_dialog = ctk.CTkToplevel(self)
@@ -139,7 +166,9 @@ class DateSelectorFrame(ctk.CTkFrame):
             self._show_simple_date_picker()
     
     def _show_simple_date_picker(self):
-        """Fallback simple date picker"""
+        """
+        Fallback simple date picker with year, month, and day dropdowns.
+        """
         try:
             # Create simple date picker dialog
             picker_dialog = ctk.CTkToplevel(self)
@@ -203,15 +232,39 @@ class DateSelectorFrame(ctk.CTkFrame):
 
     
     def get_date(self):
-        """Get the selected date as string"""
+        """
+        Get the selected date as string.
+
+        Returns:
+            str: The selected date in YYYY-MM-DD format.
+        """
         return self.selected_date.get()
     
     def set_date(self, date_str):
-        """Set the date from string"""
+        """
+        Set the date from string.
+
+        Args:
+            date_str (str): Date string in YYYY-MM-DD format.
+        """
         self.selected_date.set(date_str)
 
 class AddBillDialog(ctk.CTkToplevel):
+    """
+    Dialog for adding a new bill to the system.
+
+    Provides a comprehensive form for entering all bill details including name,
+    due date, amount, category, payment method, and contact information.
+    """
+    
     def __init__(self, master, on_success):
+        """
+        Initialize the AddBillDialog.
+
+        Args:
+            master: The parent window.
+            on_success (callable): Callback to invoke when bill is successfully added.
+        """
         super().__init__(master)
         self.title("Add Bill")
         self.geometry("550x700")
@@ -222,6 +275,9 @@ class AddBillDialog(ctk.CTkToplevel):
         self.grab_set()
 
     def _setup_ui(self):
+        """
+        Setup the add bill dialog UI with all form fields.
+        """
         self.grid_columnconfigure(1, weight=1)
         row = 0
         # Name
@@ -311,7 +367,9 @@ class AddBillDialog(ctk.CTkToplevel):
         self.add_button.grid(row=row, column=0, columnspan=2, pady=SPACING_MD)
 
     def _load_categories(self):
-        """Load categories into the dropdown"""
+        """
+        Load categories into the dropdown from the database.
+        """
         try:
             self.categories = fetch_all_categories()
             category_names = ["Uncategorized"] + [cat['name'] for cat in self.categories]
@@ -332,7 +390,10 @@ class AddBillDialog(ctk.CTkToplevel):
             self.payment_method_combo['values'] = ["Not Set"]
 
     def _on_add(self):
-        """Add a new bill with comprehensive validation"""
+        """
+        Handle bill addition with comprehensive validation.
+        Validates all fields and inserts the bill into the database.
+        """
         try:
             # Collect all field values
             bill_data = {
@@ -399,7 +460,15 @@ class AddBillDialog(ctk.CTkToplevel):
             show_popup(self, "Error", error_message, color="red")
             
     def _parse_amount(self, amount_str):
-        """Parse amount string to float, return None if empty or invalid."""
+        """
+        Parse amount string to float, return None if empty or invalid.
+
+        Args:
+            amount_str (str): The amount string to parse.
+
+        Returns:
+            float or None: The parsed amount or None if invalid.
+        """
         if not amount_str:
             return None
         try:
@@ -410,7 +479,22 @@ class AddBillDialog(ctk.CTkToplevel):
             return None
 
 class EditBillDialog(ctk.CTkToplevel):
+    """
+    Dialog for editing an existing bill.
+
+    Provides a form pre-filled with current bill data for editing.
+    Similar to AddBillDialog but for updating existing bills.
+    """
+    
     def __init__(self, master, bill_data, on_success):
+        """
+        Initialize the EditBillDialog.
+
+        Args:
+            master: The parent window.
+            bill_data (dict): The current bill data to edit.
+            on_success (callable): Callback to invoke when bill is successfully updated.
+        """
         super().__init__(master)
         self.title("Edit Bill")
         self.geometry("550x700")
@@ -422,6 +506,9 @@ class EditBillDialog(ctk.CTkToplevel):
         self.grab_set()
 
     def _setup_ui(self):
+        """
+        Setup the edit bill dialog UI with pre-filled form fields.
+        """
         self.grid_columnconfigure(1, weight=1)
         row = 0
         # Name
@@ -520,7 +607,9 @@ class EditBillDialog(ctk.CTkToplevel):
         self.save_button.grid(row=row, column=0, columnspan=2, pady=SPACING_MD)
 
     def _load_categories(self):
-        """Load categories into the dropdown"""
+        """
+        Load categories into the dropdown and set current category.
+        """
         try:
             self.categories = fetch_all_categories()
             category_names = ["Uncategorized"] + [cat['name'] for cat in self.categories]
@@ -547,7 +636,10 @@ class EditBillDialog(ctk.CTkToplevel):
             self.payment_method_combo['values'] = ["Not Set"]
 
     def _on_save(self):
-        """Save bill changes with comprehensive validation"""
+        """
+        Handle bill update with comprehensive validation.
+        Validates all fields and updates the bill in the database.
+        """
         try:
             # Collect all field values
             bill_data = {
@@ -616,7 +708,15 @@ class EditBillDialog(ctk.CTkToplevel):
             show_popup(self, "Error", error_message, color="red")
             
     def _parse_amount(self, amount_str):
-        """Parse amount string to float, return None if empty or invalid."""
+        """
+        Parse amount string to float, return None if empty or invalid.
+
+        Args:
+            amount_str (str): The amount string to parse.
+
+        Returns:
+            float or None: The parsed amount or None if invalid.
+        """
         if not amount_str:
             return None
         try:
@@ -627,7 +727,20 @@ class EditBillDialog(ctk.CTkToplevel):
             return None
 
 class AddCategoryDialog(ctk.CTkToplevel):
+    """
+    Dialog for adding a new category.
+
+    Provides a form for entering category name, color, and description.
+    """
+    
     def __init__(self, master, on_success):
+        """
+        Initialize the AddCategoryDialog.
+
+        Args:
+            master: The parent window.
+            on_success (callable): Callback to invoke when category is successfully added.
+        """
         super().__init__(master)
         self.title("Add Category")
         self.geometry("400x300")
@@ -638,6 +751,9 @@ class AddCategoryDialog(ctk.CTkToplevel):
         self.grab_set()
 
     def _setup_ui(self):
+        """
+        Setup the add category dialog UI with form fields.
+        """
         self.grid_columnconfigure(1, weight=1)
         row = 0
         
@@ -673,7 +789,10 @@ class AddCategoryDialog(ctk.CTkToplevel):
         self.add_button.grid(row=row, column=0, columnspan=2, pady=SPACING_MD)
 
     def _on_add(self):
-        """Add a new category with comprehensive validation"""
+        """
+        Handle category addition with comprehensive validation.
+        Validates all fields and inserts the category into the database.
+        """
         try:
             # Collect field values
             category_data = {
@@ -707,7 +826,21 @@ class AddCategoryDialog(ctk.CTkToplevel):
             show_popup(self, "Error", error_message, color="red")
 
 class EditCategoryDialog(ctk.CTkToplevel):
+    """
+    Dialog for editing an existing category.
+
+    Provides a form pre-filled with current category data for editing.
+    """
+    
     def __init__(self, master, category_data, on_success):
+        """
+        Initialize the EditCategoryDialog.
+
+        Args:
+            master: The parent window.
+            category_data (dict): The current category data to edit.
+            on_success (callable): Callback to invoke when category is successfully updated.
+        """
         super().__init__(master)
         self.title("Edit Category")
         self.geometry("400x300")
@@ -719,6 +852,9 @@ class EditCategoryDialog(ctk.CTkToplevel):
         self.grab_set()
 
     def _setup_ui(self):
+        """
+        Setup the edit category dialog UI with pre-filled form fields.
+        """
         self.grid_columnconfigure(1, weight=1)
         row = 0
         
@@ -756,7 +892,10 @@ class EditCategoryDialog(ctk.CTkToplevel):
         self.save_button.grid(row=row, column=0, columnspan=2, pady=SPACING_MD)
 
     def _on_save(self):
-        """Save category changes with comprehensive validation"""
+        """
+        Handle category update with comprehensive validation.
+        Validates all fields and updates the category in the database.
+        """
         try:
             # Collect field values
             category_data = {
@@ -790,7 +929,17 @@ class EditCategoryDialog(ctk.CTkToplevel):
             show_popup(self, "Error", error_message, color="red")
 
 class MainWindow(ctk.CTk):
+    """
+    Main application window for the Bills Tracker application.
+
+    Provides the primary interface for managing bills, categories, and settings.
+    Includes authentication, reminder notifications, and data management features.
+    """
+    
     def __init__(self):
+        """
+        Initialize the MainWindow with authentication, configuration, and UI setup.
+        """
         super().__init__()
         self.title("Bills Tracker v3")
         self.geometry("1200x800")
@@ -864,6 +1013,9 @@ class MainWindow(ctk.CTk):
             print(f"Error starting reminder service: {e}")
     
     def _setup_ui(self):
+        """
+        Setup the main window UI with sidebar navigation and content area.
+        """
         # Configure grid for responsive layout
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
@@ -1201,7 +1353,9 @@ class MainWindow(ctk.CTk):
         self.last_page_btn.pack(side="right", padx=SPACING_SM, pady=SPACING_SM)
 
     def apply_filters(self, *args):
-        """Apply all filters: status, period, and search"""
+        """
+        Apply filters to the bills table based on search and filter criteria.
+        """
         # Start with all bills
         filtered_bills = self._bills_data.copy()
         
@@ -1269,7 +1423,16 @@ class MainWindow(ctk.CTk):
             self.populate_bills_table(self._filtered_bills)
     
     def _filter_by_period(self, bills, period):
-        """Filter bills by time period"""
+        """
+        Filter bills by time period.
+
+        Args:
+            bills (list): List of bills to filter.
+            period (str): The time period to filter by.
+
+        Returns:
+            list: Filtered list of bills.
+        """
         from datetime import datetime, timedelta
         
         today = datetime.now()
@@ -1319,7 +1482,9 @@ class MainWindow(ctk.CTk):
         return filtered_bills
     
     def clear_all_filters(self):
-        """Clear all filters and reset to default (Pending bills)"""
+        """
+        Clear all active filters and search criteria.
+        """
         self.search_var.set("")
         self.status_filter_var.set("Pending")
         self.period_filter_var.set("All")
@@ -1335,7 +1500,9 @@ class MainWindow(ctk.CTk):
             self.populate_bills_table(self._filtered_bills)
     
     def clear_search(self):
-        """Clear only the search filter"""
+        """
+        Clear the search field and reset search results.
+        """
         self.search_var.set("")
         self.apply_filters()
 
@@ -1408,6 +1575,12 @@ class MainWindow(ctk.CTk):
         self.update_pagination_controls()
 
     def sort_by_column(self, col):
+        """
+        Sort the bills table by the specified column.
+
+        Args:
+            col (str): The column name to sort by.
+        """
         col_map = {
             "Paid": "paid",
             "Name": "name",
@@ -1549,7 +1722,9 @@ class MainWindow(ctk.CTk):
         self.populate_categories_table()
 
     def show_settings_view(self):
-        """Show the settings view"""
+        """
+        Display the settings view with theme, backup, notification, and database options.
+        """
         self.clear_content()
         
         # Title
@@ -1589,7 +1764,9 @@ class MainWindow(ctk.CTk):
             self._create_user_management_section(settings_frame)
     
     def _create_theme_section(self, parent):
-        """Create theme settings section"""
+        """
+        Create theme settings section
+        """
         # Theme section header
         theme_header = ctk.CTkLabel(
             parent,
@@ -1650,7 +1827,9 @@ class MainWindow(ctk.CTk):
         self.theme_buttons = [light_btn, dark_btn, system_btn]
     
     def _create_backup_section(self, parent):
-        """Create backup settings section"""
+        """
+        Create backup settings section
+        """
         # Backup section header
         backup_header = ctk.CTkLabel(
             parent,
@@ -1701,7 +1880,9 @@ class MainWindow(ctk.CTk):
         auto_backup_checkbox.pack(pady=SPACING_SM)
     
     def _create_notification_section(self, parent):
-        """Create notification settings section"""
+        """
+        Create notification settings section
+        """
         # Notification section header
         notification_header = ctk.CTkLabel(
             parent,
@@ -1774,7 +1955,9 @@ class MainWindow(ctk.CTk):
         auto_close_checkbox.pack(pady=SPACING_SM)
     
     def _create_database_section(self, parent):
-        """Create database settings section"""
+        """
+        Create database settings section
+        """
         # Database section header
         database_header = ctk.CTkLabel(
             parent,
@@ -1835,7 +2018,9 @@ class MainWindow(ctk.CTk):
         reset_btn.pack(side="left", padx=SPACING_SM)
     
     def _create_about_section(self, parent):
-        """Create about section"""
+        """
+        Create about section
+        """
         # About section header
         about_header = ctk.CTkLabel(
             parent,
@@ -1871,7 +2056,9 @@ class MainWindow(ctk.CTk):
         ).pack(pady=SPACING_SM)
     
     def _create_user_management_section(self, parent):
-        """Create user management section (admin only)"""
+        """
+        Create user management section (admin only)
+        """
         # User management section header
         user_header = ctk.CTkLabel(
             parent,
@@ -1929,7 +2116,9 @@ class MainWindow(ctk.CTk):
         manage_users_btn.pack(side="left", padx=SPACING_SM)
     
     def _show_create_user_dialog(self):
-        """Show dialog to create a new user"""
+        """
+        Show dialog to create a new user
+        """
         from .login_dialog import RegisterDialog
         
         def on_success(username):
@@ -1938,13 +2127,17 @@ class MainWindow(ctk.CTk):
         RegisterDialog(self, on_success)
     
     def _show_manage_users_dialog(self):
-        """Show dialog to manage users"""
+        """
+        Show dialog to manage users
+        """
         # This would be a more complex dialog showing all users
         # For now, just show a simple message
         show_popup(self, "Info", "User management dialog would be implemented here.", color="blue")
     
     def _change_theme(self, theme):
-        """Change the application theme"""
+        """
+        Change the application theme
+        """
         try:
             if theme == "System":
                 ctk.set_appearance_mode("System")
@@ -1965,7 +2158,9 @@ class MainWindow(ctk.CTk):
             print(f"Error changing theme: {e}")
     
     def _export_backup(self):
-        """Export database backup"""
+        """
+        Export database backup
+        """
         try:
             from tkinter import filedialog
             import shutil
@@ -1987,7 +2182,9 @@ class MainWindow(ctk.CTk):
             show_popup(self, "Error", f"Failed to export backup: {str(e)}", color="red")
     
     def _import_backup(self):
-        """Import database backup"""
+        """
+        Import database backup
+        """
         try:
             from tkinter import filedialog
             import shutil
@@ -2042,7 +2239,9 @@ class MainWindow(ctk.CTk):
             show_popup(self, "Error", f"Failed to import backup: {str(e)}", color="red")
     
     def _compact_database(self):
-        """Compact the database to reduce file size"""
+        """
+        Compact the database to reduce file size
+        """
         try:
             import sqlite3
             
@@ -2056,7 +2255,9 @@ class MainWindow(ctk.CTk):
             show_popup(self, "Error", f"Failed to compact database: {str(e)}", color="red")
     
     def _reset_database(self):
-        """Reset the database (clear all data)"""
+        """
+        Reset the database (clear all data)
+        """
         try:
             confirm = ctk.CTkToplevel(self)
             confirm.title("Confirm Reset")
@@ -2098,7 +2299,9 @@ class MainWindow(ctk.CTk):
     
     # Settings helper methods
     def _get_auto_backup_setting(self):
-        """Get auto-backup setting from config"""
+        """
+        Get auto-backup setting from config
+        """
         try:
             from core.config import config_manager
             return config_manager.get_auto_backup()
@@ -2106,7 +2309,9 @@ class MainWindow(ctk.CTk):
             return False
     
     def _toggle_auto_backup(self, enabled):
-        """Toggle auto-backup setting"""
+        """
+        Toggle auto-backup setting
+        """
         try:
             from core.config import config_manager
             config_manager.set_auto_backup(enabled)
@@ -2114,7 +2319,9 @@ class MainWindow(ctk.CTk):
             print(f"Error toggling auto-backup: {e}")
     
     def _get_check_interval(self):
-        """Get reminder check interval"""
+        """
+        Get reminder check interval
+        """
         try:
             from core.config import config_manager
             return config_manager.get_reminder_check_interval()
@@ -2122,7 +2329,9 @@ class MainWindow(ctk.CTk):
             return 300
     
     def _update_check_interval(self, interval_str):
-        """Update reminder check interval"""
+        """
+        Update reminder check interval
+        """
         try:
             interval = int(interval_str)
             if interval < 60:
@@ -2143,7 +2352,9 @@ class MainWindow(ctk.CTk):
             show_popup(self, "Error", f"Failed to update interval: {str(e)}", color="red")
     
     def _get_notifications_enabled(self):
-        """Get notifications enabled setting"""
+        """
+        Get notifications enabled setting
+        """
         try:
             from core.config import config_manager
             return config_manager.get_notifications_enabled()
@@ -2151,7 +2362,9 @@ class MainWindow(ctk.CTk):
             return True
     
     def _toggle_notifications(self, enabled):
-        """Toggle notifications"""
+        """
+        Toggle notifications
+        """
         try:
             from core.config import config_manager
             config_manager.set_notifications_enabled(enabled)
@@ -2159,7 +2372,9 @@ class MainWindow(ctk.CTk):
             print(f"Error toggling notifications: {e}")
     
     def _get_auto_close_notifications(self):
-        """Get auto-close notifications setting"""
+        """
+        Get auto-close notifications setting
+        """
         try:
             from core.config import config_manager
             return config_manager.get_auto_close_notifications()
@@ -2167,7 +2382,9 @@ class MainWindow(ctk.CTk):
             return True
     
     def _toggle_auto_close_notifications(self, enabled):
-        """Toggle auto-close notifications"""
+        """
+        Toggle auto-close notifications
+        """
         try:
             from core.config import config_manager
             config_manager.set_auto_close_notifications(enabled)
@@ -2175,7 +2392,9 @@ class MainWindow(ctk.CTk):
             print(f"Error toggling auto-close notifications: {e}")
     
     def _save_theme_preference(self, theme):
-        """Save theme preference"""
+        """
+        Save theme preference
+        """
         try:
             from core.config import config_manager
             config_manager.set_theme(theme)
@@ -2183,17 +2402,23 @@ class MainWindow(ctk.CTk):
             print(f"Error saving theme preference: {e}")
     
     def _check_authentication(self):
-        """Check if user is authenticated"""
+        """
+        Check if user is authenticated
+        """
         # For now, always show login dialog
         # In a real app, you'd check for saved session tokens
         self._show_login_dialog()
     
     def _show_login_dialog(self):
-        """Show login dialog"""
+        """
+        Show login dialog
+        """
         LoginDialog(self, self._on_login_success)
     
     def _on_login_success(self, user_data):
-        """Handle successful login"""
+        """
+        Handle successful login
+        """
         self.current_user = user_data
         self.session_token = user_data.get('session_token')
         
@@ -2212,7 +2437,9 @@ class MainWindow(ctk.CTk):
         show_popup(self, "Welcome", f"Welcome back, {username}!", color="green")
     
     def _logout(self):
-        """Logout current user"""
+        """
+        Logout current user
+        """
         if self.session_token:
             auth_manager.logout(self.session_token)
         
@@ -2225,12 +2452,16 @@ class MainWindow(ctk.CTk):
         self._show_login_dialog()
     
     def _show_change_password_dialog(self):
-        """Show change password dialog"""
+        """
+        Show change password dialog
+        """
         if self.current_user:
             ChangePasswordDialog(self, self.current_user['user_id'], self._on_password_changed)
     
     def _on_password_changed(self):
-        """Handle successful password change"""
+        """
+        Handle successful password change
+        """
         show_popup(self, "Success", "Password changed successfully!", color="green")
 
     def edit_selected_bill(self):
@@ -2296,7 +2527,9 @@ class MainWindow(ctk.CTk):
                 show_popup(self, "Error", f"Failed to delete bill: {str(e)}", color="red")
 
     def bulk_delete_selected_bills(self):
-        """Delete multiple selected bills"""
+        """
+        Delete multiple selected bills
+        """
         if not self._selected_bills:
             # Info popup removed for faster workflow
             return
@@ -2469,7 +2702,12 @@ class MainWindow(ctk.CTk):
             show_popup(self, "Error", f"Failed to import bills: {str(e)}", color="red")
 
     def on_table_click(self, event):
-        """Handle clicks on the table, specifically for checkbox columns"""
+        """
+        Handle table click events for selection and actions.
+
+        Args:
+            event: The click event object.
+        """
         region = self.bills_table.identify("region", event.x, event.y)
         if region == "cell":
             column = self.bills_table.identify_column(event.x)
@@ -2484,7 +2722,12 @@ class MainWindow(ctk.CTk):
                 self.toggle_paid_status(item)
     
     def toggle_bill_selection(self, item_id):
-        """Toggle the selection status of a bill"""
+        """
+        Toggle the selection state of a bill in the table.
+
+        Args:
+            item_id: The ID of the bill to toggle selection for.
+        """
         if item_id in self.bills_by_id:
             bill = self.bills_by_id[item_id]
             bill_id = bill["id"]
@@ -2505,7 +2748,9 @@ class MainWindow(ctk.CTk):
             self.update_bulk_actions()
     
     def toggle_select_all(self):
-        """Toggle select all/none for all visible bills"""
+        """
+        Toggle selection of all visible bills on the current page.
+        """
         all_items = self.bills_table.get_children()
         if not all_items:
             return
@@ -2547,7 +2792,9 @@ class MainWindow(ctk.CTk):
         self.update_bulk_actions()
     
     def update_bulk_actions(self):
-        """Update the state of bulk action buttons based on selection"""
+        """
+        Update the state of bulk action buttons based on selection
+        """
         selected_count = len(self._selected_bills)
         if selected_count > 0:
             self.bulk_delete_btn.configure(text=f"Delete Selected ({selected_count})", state="normal")
@@ -2555,7 +2802,9 @@ class MainWindow(ctk.CTk):
             self.bulk_delete_btn.configure(text="Delete Selected", state="disabled")
     
     def update_pagination_controls(self):
-        """Update pagination controls and info"""
+        """
+        Update the pagination controls with current page information.
+        """
         try:
             # Update pagination info
             if hasattr(self, 'pagination_info_label') and self.pagination_info_label.winfo_exists():
@@ -2581,31 +2830,44 @@ class MainWindow(ctk.CTk):
             pass
     
     def go_to_first_page(self):
-        """Go to the first page"""
+        """
+        Navigate to the first page of results.
+        """
         if self._current_page != 1:
             self._current_page = 1
             self.populate_bills_table(self._filtered_bills)
     
     def go_to_prev_page(self):
-        """Go to the previous page"""
+        """
+        Navigate to the previous page of results.
+        """
         if self._current_page > 1:
             self._current_page -= 1
             self.populate_bills_table(self._filtered_bills)
     
     def go_to_next_page(self):
-        """Go to the next page"""
+        """
+        Navigate to the next page of results.
+        """
         if self._current_page < self._total_pages:
             self._current_page += 1
             self.populate_bills_table(self._filtered_bills)
     
     def go_to_last_page(self):
-        """Go to the last page"""
+        """
+        Navigate to the last page of results.
+        """
         if self._current_page != self._total_pages:
             self._current_page = self._total_pages
             self.populate_bills_table(self._filtered_bills)
     
     def on_items_per_page_change(self, event=None):
-        """Handle items per page change"""
+        """
+        Handle change in items per page setting.
+
+        Args:
+            event: The change event (optional).
+        """
         try:
             new_items_per_page = int(self.items_per_page_var.get())
             if new_items_per_page != self._items_per_page:
@@ -2617,7 +2879,12 @@ class MainWindow(ctk.CTk):
             self.items_per_page_var.set(str(self._items_per_page))
     
     def toggle_paid_status(self, item_id):
-        """Toggle the paid status of a bill in the table and store as pending change"""
+        """
+        Toggle the paid status of a bill.
+
+        Args:
+            item_id: The ID of the bill to toggle paid status for.
+        """
         if item_id in self.bills_by_id:
             bill = self.bills_by_id[item_id]
             current_paid = bill.get("paid", False)
@@ -2657,7 +2924,16 @@ class MainWindow(ctk.CTk):
                     self.apply_btn.configure(text="Apply Changes", fg_color="green")
     
     def _calculate_next_due_date(self, current_due_date, billing_cycle):
-        """Calculate the next due date based on billing cycle"""
+        """
+        Calculate the next due date based on billing cycle.
+
+        Args:
+            current_due_date (str): Current due date in YYYY-MM-DD format.
+            billing_cycle (str): The billing cycle (weekly, monthly, etc.).
+
+        Returns:
+            str: Next due date in YYYY-MM-DD format.
+        """
         try:
             current_date = datetime.strptime(current_due_date, "%Y-%m-%d")
         except ValueError:
@@ -2693,7 +2969,9 @@ class MainWindow(ctk.CTk):
         return next_date.strftime("%Y-%m-%d")
     
     def apply_pending_changes(self):
-        """Apply all pending changes to the database"""
+        """
+        Apply all pending changes to bills in the database.
+        """
         if not self.pending_changes:
             # Info popup removed for faster workflow
             return
@@ -2766,7 +3044,9 @@ class MainWindow(ctk.CTk):
             show_popup(self, "Error", f"Failed to apply changes: {str(e)}", color="red")
     
     def refresh_bills_data(self):
-        """Refresh bills data from database"""
+        """
+        Refresh the bills data with confirmation dialog.
+        """
         # Check if there are pending changes
         if self.pending_changes:
             # Ask user if they want to discard pending changes
@@ -2828,7 +3108,9 @@ class MainWindow(ctk.CTk):
             self._refresh_data_direct()
     
     def _refresh_data_direct(self):
-        """Helper method to refresh data directly"""
+        """
+        Refresh bills data directly without confirmation.
+        """
         try:
             self._bills_data = fetch_all_bills()
             self._filtered_bills = self._bills_data.copy()
@@ -2842,7 +3124,9 @@ class MainWindow(ctk.CTk):
 
     # Category management methods
     def populate_categories_table(self):
-        """Populate the categories table with data"""
+        """
+        Populate the categories table with current data.
+        """
         for row in self.categories_table.get_children():
             self.categories_table.delete(row)
         
@@ -2868,11 +3152,15 @@ class MainWindow(ctk.CTk):
             print(f"Error populating categories table: {e}")
 
     def open_add_category_dialog(self):
-        """Open dialog to add a new category"""
+        """
+        Open the dialog for adding a new category.
+        """
         AddCategoryDialog(self, self.refresh_categories)
 
     def edit_selected_category(self):
-        """Edit the selected category"""
+        """
+        Open the edit dialog for the currently selected category.
+        """
         selected = self.categories_table.selection()
         if not selected:
             # Info popup removed for faster workflow
@@ -2893,7 +3181,9 @@ class MainWindow(ctk.CTk):
             show_popup(self, "Error", "Category not found.", color="red")
 
     def delete_selected_category(self):
-        """Delete the selected category"""
+        """
+        Delete the currently selected category with confirmation dialog.
+        """
         selected = self.categories_table.selection()
         if not selected:
             # Info popup removed for faster workflow
@@ -2960,11 +3250,15 @@ class MainWindow(ctk.CTk):
             print(f"Delete confirm dialog error: {e}")
 
     def refresh_categories(self):
-        """Refresh the categories table"""
+        """
+        Refresh the categories table with current data.
+        """
         self.populate_categories_table()
 
     def _on_close(self):
-        """Handle window close event"""
+        """
+        Handle window close event with cleanup and configuration saving.
+        """
         try:
             # Save window size
             if hasattr(self, 'config_manager') and self.config_manager:
@@ -3072,6 +3366,12 @@ class MainWindow(ctk.CTk):
 
 # Add this function near the top of the file (after color constants)
 def is_dark_mode():
+    """
+    Check if the application is currently in dark mode.
+
+    Returns:
+        bool: True if dark mode is active, False otherwise.
+    """
     mode = ctk.get_appearance_mode()
     return mode.lower() == "dark"
 

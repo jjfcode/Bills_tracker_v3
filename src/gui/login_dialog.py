@@ -23,9 +23,21 @@ SPACING_MD = 20
 SPACING_LG = 32
 
 class LoginDialog(ctk.CTkToplevel):
-    """Login dialog for user authentication"""
+    """
+    Login dialog for user authentication.
+
+    Presents a modal dialog for users to enter their username and password, with support for dark mode,
+    'remember me', and a link to registration. Calls the provided on_success callback with user data on successful login.
+    """
     
     def __init__(self, master, on_success):
+        """
+        Initialize the LoginDialog.
+
+        Args:
+            master: The parent window.
+            on_success (callable): Callback to invoke with user data on successful login.
+        """
         super().__init__(master)
         self.title("Login - Bills Tracker")
         self.geometry("420x600")
@@ -57,7 +69,9 @@ class LoginDialog(ctk.CTkToplevel):
         self._check_remembered_user()
     
     def _set_theme_colors(self):
-        """Set theme colors based on dark mode."""
+        """
+        Set theme colors based on dark mode.
+        """
         if self.dark_mode:
             self.bg_color = DARK_BG_COLOR
             self.frame_bg = DARK_FRAME_BG
@@ -76,7 +90,9 @@ class LoginDialog(ctk.CTkToplevel):
             self.link_color = LINK_COLOR
     
     def _setup_ui(self):
-        """Setup the login UI"""
+        """
+        Setup the login UI widgets and layout.
+        """
         # Configure grid
         self.grid_columnconfigure(0, weight=1)
         
@@ -167,14 +183,18 @@ class LoginDialog(ctk.CTkToplevel):
         self.password_entry.bind("<Return>", lambda e: self._login())
     
     def _check_remembered_user(self):
-        """Check if there's a remembered username"""
+        """
+        Check if there's a remembered username and pre-fill the username entry if found.
+        """
         if self.saved_credentials and 'username' in self.saved_credentials:
             self.username_entry.insert(0, self.saved_credentials['username'])
             self.remember_var.set(True)
             self.password_entry.focus()
     
     def _login(self):
-        """Handle login attempt"""
+        """
+        Handle login attempt. Authenticates the user and calls on_success if successful.
+        """
         username = self.username_entry.get().strip()
         password = self.password_entry.get()
         
@@ -212,23 +232,41 @@ class LoginDialog(ctk.CTkToplevel):
             self.login_button.configure(state="normal", text="Sign In")
     
     def _show_error(self, message):
-        """Show error message"""
+        """
+        Show error message in the dialog.
+
+        Args:
+            message (str): The error message to display.
+        """
         self.error_label.configure(text=message)
         self.error_label.grid()  # Ensure it's visible
     
     def _show_register_dialog(self):
+        """
+        Open the registration dialog when the user clicks 'New User?'.
+        """
         print("Register button clicked!")
         RegisterDialog(self, self._on_register_success)
     
     def _on_register_success(self, username):
-        """Handle successful registration"""
+        """
+        Handle successful registration by pre-filling the username and prompting for login.
+
+        Args:
+            username (str): The username of the newly registered user.
+        """
         self.username_entry.delete(0, "end")
         self.username_entry.insert(0, username)
         self.password_entry.focus()
         self._show_error("Registration successful! Please sign in.")
     
     def _load_saved_credentials(self):
-        """Load saved credentials from file"""
+        """
+        Load saved credentials from file if 'remember me' was checked.
+
+        Returns:
+            dict: The saved credentials, or an empty dict if not found.
+        """
         try:
             if os.path.exists("saved_credentials.json"):
                 with open("saved_credentials.json", "r") as f:
@@ -238,7 +276,12 @@ class LoginDialog(ctk.CTkToplevel):
         return {}
     
     def _save_credentials(self, username):
-        """Save username to file"""
+        """
+        Save the username to file for 'remember me' functionality.
+
+        Args:
+            username (str): The username to save.
+        """
         try:
             credentials = {"username": username}
             with open("saved_credentials.json", "w") as f:
@@ -247,7 +290,9 @@ class LoginDialog(ctk.CTkToplevel):
             pass
     
     def _clear_saved_credentials(self):
-        """Clear saved credentials"""
+        """
+        Clear saved credentials from file.
+        """
         try:
             if os.path.exists("saved_credentials.json"):
                 os.remove("saved_credentials.json")
@@ -255,9 +300,21 @@ class LoginDialog(ctk.CTkToplevel):
             pass
 
 class RegisterDialog(ctk.CTkToplevel):
-    """Registration dialog"""
+    """
+    Registration dialog for creating a new user account.
+
+    Presents a modal dialog for users to enter a username, email, and password. Calls the provided on_success
+    callback with the username on successful registration.
+    """
     
     def __init__(self, master, on_success):
+        """
+        Initialize the RegisterDialog.
+
+        Args:
+            master: The parent window.
+            on_success (callable): Callback to invoke with the username on successful registration.
+        """
         super().__init__(master)
         self.title("Create Account - Bills Tracker")
         self.geometry("400x600")
@@ -279,7 +336,9 @@ class RegisterDialog(ctk.CTkToplevel):
         self._setup_ui()
     
     def _setup_ui(self):
-        """Setup the registration UI"""
+        """
+        Setup the registration UI widgets and layout.
+        """
         # Configure grid
         self.grid_columnconfigure(0, weight=1)
         
@@ -363,7 +422,9 @@ class RegisterDialog(ctk.CTkToplevel):
         self.confirm_password_entry.bind("<Return>", lambda e: self.do_register())
     
     def do_register(self):
-        """Handle registration attempt"""
+        """
+        Handle registration attempt. Validates input and registers the user.
+        """
         username = self.username_entry.get().strip()
         email = self.email_entry.get().strip()
         password = self.password_entry.get()
@@ -411,14 +472,32 @@ class RegisterDialog(ctk.CTkToplevel):
             self.register_button.configure(state="normal", text="Create Account")
     
     def _show_error(self, message):
-        """Show error message"""
+        """
+        Show error message in the dialog.
+
+        Args:
+            message (str): The error message to display.
+        """
         self.error_label.configure(text=message)
         self.error_label.grid()  # Ensure it's visible
 
 class ChangePasswordDialog(ctk.CTkToplevel):
-    """Change password dialog"""
+    """
+    Dialog for changing the user's password.
+
+    Presents a modal dialog for users to enter their current password and a new password. Calls the provided
+    on_success callback on successful password change.
+    """
     
     def __init__(self, master, user_id, on_success):
+        """
+        Initialize the ChangePasswordDialog.
+
+        Args:
+            master: The parent window.
+            user_id: The ID of the user changing their password.
+            on_success (callable): Callback to invoke on successful password change.
+        """
         super().__init__(master)
         self.title("Change Password - Bills Tracker")
         self.geometry("400x400")
@@ -441,7 +520,9 @@ class ChangePasswordDialog(ctk.CTkToplevel):
         self._setup_ui()
     
     def _setup_ui(self):
-        """Setup the change password UI"""
+        """
+        Setup the change password UI widgets and layout.
+        """
         # Configure grid
         self.grid_columnconfigure(0, weight=1)
         
@@ -518,7 +599,9 @@ class ChangePasswordDialog(ctk.CTkToplevel):
         self.confirm_password_entry.bind("<Return>", lambda e: self._change_password())
     
     def _change_password(self):
-        """Handle password change attempt"""
+        """
+        Handle password change attempt. Validates input and changes the password.
+        """
         current_password = self.current_password_entry.get()
         new_password = self.new_password_entry.get()
         confirm_password = self.confirm_password_entry.get()
@@ -561,6 +644,11 @@ class ChangePasswordDialog(ctk.CTkToplevel):
             self.change_button.configure(state="normal", text="Change Password")
     
     def _show_error(self, message):
-        """Show error message"""
+        """
+        Show error message in the dialog.
+
+        Args:
+            message (str): The error message to display.
+        """
         self.error_label.configure(text=message)
         self.error_label.grid()  # Ensure it's visible 
