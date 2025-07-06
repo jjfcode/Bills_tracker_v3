@@ -2455,6 +2455,41 @@ class MainWindow(ctk.CTk):
         except Exception as e:
             print(f"Error changing icon set: {e}")
     
+    def _show_upload_icon_dialog(self):
+        """Show the custom icon upload dialog."""
+        try:
+            from gui.icon_utils import CustomIconUploadDialog
+            CustomIconUploadDialog(self, icon_manager, self._on_custom_icon_updated)
+        except Exception as e:
+            print(f"Error showing upload icon dialog: {e}")
+    
+    def _show_manage_icons_dialog(self):
+        """Show the custom icon management dialog."""
+        try:
+            from gui.icon_utils import CustomIconManagerDialog
+            CustomIconManagerDialog(self, icon_manager, self._on_custom_icon_updated)
+        except Exception as e:
+            print(f"Error showing manage icons dialog: {e}")
+    
+    def _on_custom_icon_updated(self):
+        """Handle custom icon updates and refresh the UI."""
+        try:
+            # Refresh available icon sets
+            available_sets = icon_manager.get_available_icon_sets()
+            
+            # Update the icon set dropdown if it exists
+            if hasattr(self, 'icon_set_var'):
+                current_set = self.icon_set_var.get()
+                # Update the dropdown values
+                # Note: We can't directly update CTkComboBox values, so we'll refresh the settings view
+                if "custom" in available_sets and current_set == "custom":
+                    # If custom set is selected and has icons, refresh the view
+                    self._refresh_current_view()
+            
+            print("Custom icons updated successfully")
+        except Exception as e:
+            print(f"Error updating custom icons: {e}")
+    
     def _refresh_current_view(self):
         """Refresh the current view to show updated icons."""
         try:
