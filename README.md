@@ -412,4 +412,13 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Customizable themes
 - Enhanced accessibility
 
-See `docs/features/AUTHENTICATION.md` for more details on authentication. 
+See `docs/features/AUTHENTICATION.md` for more details on authentication.
+
+## Theme System
+
+Bills Tracker now supports theme presets! You can choose from:
+- **Professional**
+- **Casual**
+- **High Contrast**
+
+Select your preferred theme in the settings panel. The UI updates instantly and your choice is saved for future sessions. Real-time theme switching is fully supported. 

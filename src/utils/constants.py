@@ -67,4 +67,25 @@ DB_FILE = 'bills_tracker.db'
 MIN_WINDOW_WIDTH = 800
 MIN_WINDOW_HEIGHT = 600
 DEFAULT_WINDOW_WIDTH = 1200
-DEFAULT_WINDOW_HEIGHT = 800 
+DEFAULT_WINDOW_HEIGHT = 800
+
+THEME_PRESETS = {
+    "Professional": {
+        "PRIMARY_COLOR": "#1f538d",
+        "ACCENT_COLOR": "#4ecdc4",
+        "BACKGROUND_COLOR": "#f7f9fa",
+        "TEXT_COLOR": "#222831"
+    },
+    "Casual": {
+        "PRIMARY_COLOR": "#ff9800",
+        "ACCENT_COLOR": "#ff6b6b",
+        "BACKGROUND_COLOR": "#fffbe7",
+        "TEXT_COLOR": "#333333"
+    },
+    "High Contrast": {
+        "PRIMARY_COLOR": "#000000",
+        "ACCENT_COLOR": "#ffff00",
+        "BACKGROUND_COLOR": "#ffffff",
+        "TEXT_COLOR": "#000000"
+    }
+} 

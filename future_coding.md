@@ -162,10 +162,12 @@ This document outlines the next steps and features to implement for the Bills Tr
 - [ ] **Icon preview**: Show icon previews in settings
 
 ### 6.2 Theme System
+- [x] **Theme presets**: Pre-built themes (Professional, Casual, High Contrast) ✅ **COMPLETED**
 - [ ] **Dark mode support**: Complete dark theme implementation
-- [ ] **Theme switching**: Real-time theme switching without restart
+- [x] **Theme switching**: Real-time theme switching without restart ✅ **COMPLETED**
 - [ ] **Custom color schemes**: User-defined color palettes
-- [ ] **Theme presets**: Pre-built themes (Professional, Casual, High Contrast)
+
+**Update:** Users can now select from Professional, Casual, and High Contrast theme presets in the settings panel. The UI updates instantly and the choice is saved in config.
 
 ### 6.3 Animation & Effects
 - [ ] **Smooth transitions**: Fade in/out effects for dialogs

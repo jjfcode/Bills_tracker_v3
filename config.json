@@ -1,5 +1,5 @@
 {
-  "theme": "Dark",
+  "theme": "Light",
   "auto_backup": false,
   "backup_interval_days": 7,
   "notifications_enabled": true,
@@ -11,5 +11,6 @@
   "items_per_page": 20,
   "last_backup_date": null,
   "database_version": "3.0",
-  "icon_set": "default"
+  "icon_set": "default",
+  "theme_preset": "Professional"
 }

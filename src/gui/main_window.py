@@ -19,6 +19,7 @@ from ..core.reminder_service import ReminderService
 from ..core.auth import auth_manager, AuthenticationError
 from .login_dialog import LoginDialog, ChangePasswordDialog
 from customtkinter import CTkComboBox
+from src.utils.constants import THEME_PRESETS
 
 BILLING_CYCLES = [
     "weekly", "bi-weekly", "monthly", "quarterly", "semi-annually", "annually", "one-time"
@@ -1854,6 +1855,36 @@ class MainWindow(ctk.CTk):
         )
         icon_set_combo.pack(side="left", padx=SPACING_SM, pady=SPACING_SM)
     
+        # Theme Preset Selection
+        preset_names = list(THEME_PRESETS.keys())
+        current_preset = self._get_current_theme_preset() if hasattr(self, '_get_current_theme_preset') else 'Professional'
+        self.theme_preset_var = ctk.StringVar(value=current_preset)
+
+        def on_preset_change(preset_name):
+            preset = THEME_PRESETS[preset_name]
+            # Update global color variables
+            global PRIMARY_COLOR, ACCENT_COLOR, BACKGROUND_COLOR, TEXT_COLOR
+            PRIMARY_COLOR = preset["PRIMARY_COLOR"]
+            ACCENT_COLOR = preset["ACCENT_COLOR"]
+            BACKGROUND_COLOR = preset["BACKGROUND_COLOR"]
+            TEXT_COLOR = preset["TEXT_COLOR"]
+            try:
+                from core.config import config_manager
+                config_manager.set("theme_preset", preset_name)
+            except Exception as e:
+                print(f"Error saving theme preset: {e}")
+            self._refresh_current_view()
+
+        ctk.CTkLabel(theme_frame, text="Theme Preset:", font=("Arial", 12)).pack(side="left", padx=SPACING_SM)
+        preset_combo = CTkComboBox(
+            theme_frame,
+            variable=self.theme_preset_var,
+            values=preset_names,
+            command=on_preset_change,
+            width=150
+        )
+        preset_combo.pack(side="left", padx=SPACING_SM)
+    
     def _create_backup_section(self, parent):
         """
         Create backup settings section
@@ -3465,6 +3496,15 @@ class MainWindow(ctk.CTk):
                 
         except Exception as e:
             show_popup(self, "Error", f"Failed to snooze reminder: {str(e)}", color="red")
+
+    def _get_current_theme_preset(self):
+        """Get the current theme preset from config."""
+        try:
+            from core.config import config_manager
+            return config_manager.get('theme_preset', 'Professional')
+        except Exception as e:
+            print(f"Error getting theme preset preference: {e}")
+            return 'Professional'
 
 # Add this function near the top of the file (after color constants)
 def is_dark_mode():
