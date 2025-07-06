@@ -1,5 +1,5 @@
 {
-  "theme": "Light",
+  "theme": "Dark",
   "auto_backup": false,
   "backup_interval_days": 7,
   "notifications_enabled": true,
