@@ -157,7 +157,7 @@ This document outlines the next steps and features to implement for the Bills Tr
 
 ### 6.1 Icon Integration
 - [x] **Add actual icon files** to `resources/icons/` directory ✅ **COMPLETED**
-- [ ] **Icon set selection**: Allow users to choose different icon styles
+- [x] **Icon set selection**: Allow users to choose different icon styles ✅ **COMPLETED**
 - [ ] **Custom icon upload**: Let users add their own icons
 - [ ] **Icon preview**: Show icon previews in settings
 
@@ -244,7 +244,7 @@ This document outlines the next steps and features to implement for the Bills Tr
 1. **Dark mode implementation** - Add theme switching
 2. **Enhanced table styling** - Better visual separation
 3. **Keyboard navigation** - Improve accessibility
-4. **Icon set selection** - Allow users to choose different icon styles
+4. **Custom icon upload** - Let users add their own icons
 
 ### Short Term (Next Month):
 1. **Animation effects** - Add smooth transitions

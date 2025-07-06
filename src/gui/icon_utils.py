@@ -9,38 +9,49 @@ class IconManager:
     
     Provides methods to load and cache icons from the filesystem, with fallback
     support when icons are not available. Supports both light and dark themes.
+    Now supports multiple icon sets (styles).
     """
     
-    def __init__(self, icon_path: str = "resources/icons"):
+    def __init__(self, icon_set: str = "default", icon_base_path: str = "resources/icons"):
         """
         Initialize the IconManager.
         
         Args:
-            icon_path (str): Path to the directory containing icon files (default: "resources/icons").
+            icon_set (str): Name of the icon set (subdirectory in icons/).
+            icon_base_path (str): Path to the base directory containing icon sets.
         """
-        self.icon_path = icon_path
+        self.icon_base_path = icon_base_path
+        self.icon_set = icon_set
         self._icon_cache = {}
+    
+    def get_icon_path(self, icon_name: str) -> str:
+        """Get the full path to the icon file for the current set."""
+        return os.path.join(self.icon_base_path, self.icon_set, f"{icon_name}.png")
     
     def get_icon(self, icon_name: str, size: Tuple[int, int] = (16, 16)) -> Optional[ctk.CTkImage]:
         """
-        Get an icon image from the filesystem.
-        
-        Args:
-            icon_name (str): Name of the icon file (without extension).
-            size (Tuple[int, int]): Size of the icon as (width, height) in pixels (default: (16, 16)).
-            
-        Returns:
-            Optional[ctk.CTkImage]: The icon image if found, None otherwise.
+        Get an icon image from the filesystem for the current icon set.
         """
         try:
-            icon_file = os.path.join(self.icon_path, f"{icon_name}.png")
+            icon_file = self.get_icon_path(icon_name)
             if os.path.exists(icon_file):
-                # Load the image using PIL first
                 pil_image = Image.open(icon_file)
                 return ctk.CTkImage(light_image=pil_image, dark_image=pil_image, size=size)
         except Exception as e:
-            print(f"Error loading icon {icon_name}: {e}")
+            print(f"Error loading icon {icon_name} from set '{self.icon_set}': {e}")
         return None
+    
+    def set_icon_set(self, icon_set: str):
+        """Change the current icon set and clear the cache."""
+        self.icon_set = icon_set
+        self._icon_cache = {}
+    
+    def get_available_icon_sets(self) -> list:
+        """Return a list of available icon set names (subdirectories)."""
+        try:
+            return [d for d in os.listdir(self.icon_base_path) if os.path.isdir(os.path.join(self.icon_base_path, d))]
+        except Exception:
+            return ["default"]
     
     def get_button_with_icon(self, master, text: str, icon_name: str = None, 
                            command=None, size: Tuple[int, int] = (16, 16), **kwargs) -> ctk.CTkButton:
@@ -66,7 +77,7 @@ class IconManager:
             return ctk.CTkButton(master, text=text, command=command, **kwargs)
 
 # Global icon manager instance
-icon_manager = IconManager()
+icon_manager = IconManager(icon_set="default")
 
 # Icon name constants for consistency
 ICON_ADD = "add"          # Add/plus icon

@@ -10,5 +10,6 @@
   "window_height": 800,
   "items_per_page": 20,
   "last_backup_date": null,
-  "database_version": "3.0"
+  "database_version": "3.0",
+  "icon_set": "default"
 }

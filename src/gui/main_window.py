@@ -1105,6 +1105,7 @@ class MainWindow(ctk.CTk):
             widget.destroy()
 
     def show_bills_view(self):
+        self.current_view = "bills"
         self.clear_content()
         
         # Detect dark mode
@@ -1619,6 +1620,7 @@ class MainWindow(ctk.CTk):
         AddBillDialog(self, self.show_bills_view)
 
     def show_categories_view(self):
+        self.current_view = "categories"
         self.clear_content()
         
         # Configure grid for responsive layout
@@ -1725,6 +1727,7 @@ class MainWindow(ctk.CTk):
         """
         Display the settings view with theme, backup, notification, and database options.
         """
+        self.current_view = "settings"
         self.clear_content()
         
         # Title
@@ -1825,6 +1828,31 @@ class MainWindow(ctk.CTk):
         
         # Store buttons for updating colors
         self.theme_buttons = [light_btn, dark_btn, system_btn]
+        
+        # Icon Set Selection
+        icon_set_frame = ctk.CTkFrame(theme_frame)
+        icon_set_frame.pack(fill="x", pady=(SPACING_MD, SPACING_SM), padx=SPACING_SM)
+        
+        ctk.CTkLabel(
+            icon_set_frame,
+            text="Icon Style:",
+            font=("Arial", 12)
+        ).pack(side="left", padx=SPACING_SM, pady=SPACING_SM)
+        
+        # Get available icon sets
+        available_sets = icon_manager.get_available_icon_sets()
+        current_icon_set = self._get_current_icon_set()
+        
+        # Icon set dropdown
+        self.icon_set_var = ctk.StringVar(value=current_icon_set)
+        icon_set_combo = CTkComboBox(
+            icon_set_frame,
+            variable=self.icon_set_var,
+            values=available_sets,
+            command=self._change_icon_set,
+            width=150
+        )
+        icon_set_combo.pack(side="left", padx=SPACING_SM, pady=SPACING_SM)
     
     def _create_backup_section(self, parent):
         """
@@ -2400,6 +2428,45 @@ class MainWindow(ctk.CTk):
             config_manager.set_theme(theme)
         except Exception as e:
             print(f"Error saving theme preference: {e}")
+    
+    def _get_current_icon_set(self):
+        """Get the current icon set from config."""
+        try:
+            from core.config import config_manager
+            return config_manager.get('icon_set', 'default')
+        except Exception as e:
+            print(f"Error getting icon set preference: {e}")
+            return 'default'
+    
+    def _change_icon_set(self, icon_set):
+        """Change the icon set and refresh the UI."""
+        try:
+            # Update the icon manager
+            icon_manager.set_icon_set(icon_set)
+            
+            # Save to config
+            from core.config import config_manager
+            config_manager.set('icon_set', icon_set)
+            
+            # Refresh the current view to show new icons
+            self._refresh_current_view()
+            
+            print(f"Icon set changed to: {icon_set}")
+        except Exception as e:
+            print(f"Error changing icon set: {e}")
+    
+    def _refresh_current_view(self):
+        """Refresh the current view to show updated icons."""
+        try:
+            if hasattr(self, 'current_view'):
+                if self.current_view == "bills":
+                    self.show_bills_view()
+                elif self.current_view == "categories":
+                    self.show_categories_view()
+                elif self.current_view == "settings":
+                    self.show_settings_view()
+        except Exception as e:
+            print(f"Error refreshing current view: {e}")
     
     def _check_authentication(self):
         """
