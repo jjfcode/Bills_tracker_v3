@@ -3,6 +3,8 @@ from tkinter import messagebox
 from ..core.auth import auth_manager, AuthenticationError
 import json
 import os
+from ..utils.constants import *
+from ..utils.helpers import is_dark_mode
 
 # UI Constants
 PRIMARY_COLOR = "#2563eb"  # Modern blue
@@ -30,7 +32,11 @@ class LoginDialog(ctk.CTkToplevel):
         self.resizable(False, False)
         self.on_success = on_success
         self.current_user = None
-        self.configure(fg_color=BACKGROUND_COLOR)
+
+        # Detect dark mode
+        self.dark_mode = is_dark_mode()
+        self._set_theme_colors()
+        self.configure(fg_color=self.bg_color)
         
         # Center the dialog
         self.update_idletasks()
@@ -50,6 +56,25 @@ class LoginDialog(ctk.CTkToplevel):
         self._setup_ui()
         self._check_remembered_user()
     
+    def _set_theme_colors(self):
+        """Set theme colors based on dark mode."""
+        if self.dark_mode:
+            self.bg_color = DARK_BG_COLOR
+            self.frame_bg = DARK_FRAME_BG
+            self.text_color = DARK_TEXT_COLOR
+            self.entry_bg = DARK_ENTRY_BG
+            self.border_color = DARK_BORDER_COLOR
+            self.primary_color = DARK_PRIMARY_COLOR
+            self.link_color = DARK_LINK_COLOR
+        else:
+            self.bg_color = BACKGROUND_COLOR
+            self.frame_bg = FRAME_BG
+            self.text_color = TEXT_COLOR
+            self.entry_bg = "#f3f4f6"
+            self.border_color = BORDER_COLOR
+            self.primary_color = PRIMARY_COLOR
+            self.link_color = LINK_COLOR
+    
     def _setup_ui(self):
         """Setup the login UI"""
         # Configure grid
@@ -60,7 +85,7 @@ class LoginDialog(ctk.CTkToplevel):
             self, 
             text="💰 Bills Tracker", 
             font=("Segoe UI", 26, "bold"),
-            text_color=PRIMARY_COLOR
+            text_color=self.primary_color
         )
         title_label.grid(row=0, column=0, pady=(SPACING_LG, SPACING_SM))
         
@@ -68,27 +93,27 @@ class LoginDialog(ctk.CTkToplevel):
             self,
             text="Sign in to continue",
             font=("Segoe UI", 15),
-            text_color="gray"
+            text_color=self.text_color if self.dark_mode else "gray"
         )
         subtitle_label.grid(row=1, column=0, pady=(0, SPACING_LG))
         
         # Login frame
-        self.login_frame = ctk.CTkFrame(self, corner_radius=16, fg_color=FRAME_BG, border_width=1, border_color=BORDER_COLOR)
+        self.login_frame = ctk.CTkFrame(self, corner_radius=16, fg_color=self.frame_bg, border_width=1, border_color=self.border_color)
         self.login_frame.grid(row=2, column=0, padx=SPACING_MD, pady=SPACING_SM, sticky="ew")
         self.login_frame.grid_columnconfigure(0, weight=1)
         
         # Username
-        ctk.CTkLabel(self.login_frame, text="Username:", font=("Segoe UI", 12)).grid(
+        ctk.CTkLabel(self.login_frame, text="Username:", font=("Segoe UI", 12), text_color=self.text_color).grid(
             row=0, column=0, padx=SPACING_SM, pady=(SPACING_MD, SPACING_SM), sticky="w"
         )
-        self.username_entry = ctk.CTkEntry(self.login_frame, placeholder_text="Enter username", fg_color="#f3f4f6", font=("Segoe UI", 12))
+        self.username_entry = ctk.CTkEntry(self.login_frame, placeholder_text="Enter username", fg_color=self.entry_bg, font=("Segoe UI", 12), text_color=self.text_color)
         self.username_entry.grid(row=1, column=0, padx=SPACING_SM, pady=(0, SPACING_MD), sticky="ew")
         
         # Password
-        ctk.CTkLabel(self.login_frame, text="Password:", font=("Segoe UI", 12)).grid(
+        ctk.CTkLabel(self.login_frame, text="Password:", font=("Segoe UI", 12), text_color=self.text_color).grid(
             row=2, column=0, padx=SPACING_SM, pady=(0, SPACING_SM), sticky="w"
         )
-        self.password_entry = ctk.CTkEntry(self.login_frame, placeholder_text="Enter password", show="*", fg_color="#f3f4f6", font=("Segoe UI", 12))
+        self.password_entry = ctk.CTkEntry(self.login_frame, placeholder_text="Enter password", show="*", fg_color=self.entry_bg, font=("Segoe UI", 12), text_color=self.text_color)
         self.password_entry.grid(row=3, column=0, padx=SPACING_SM, pady=(0, SPACING_MD), sticky="ew")
         
         # Remember me checkbox
@@ -97,7 +122,8 @@ class LoginDialog(ctk.CTkToplevel):
             self.login_frame, 
             text="Remember username", 
             variable=self.remember_var,
-            font=("Segoe UI", 11)
+            font=("Segoe UI", 11),
+            text_color=self.text_color
         )
         remember_checkbox.grid(row=4, column=0, padx=SPACING_SM, pady=(0, SPACING_MD), sticky="w")
         
@@ -115,8 +141,8 @@ class LoginDialog(ctk.CTkToplevel):
             self.login_frame,
             text="Sign In",
             command=self._login,
-            fg_color=PRIMARY_COLOR,
-            hover_color="#1d4ed8",
+            fg_color=self.primary_color,
+            hover_color="#1d4ed8" if not self.dark_mode else self.primary_color,
             text_color="white",
             corner_radius=8,
             font=("Segoe UI", 13, "bold"),
@@ -129,7 +155,7 @@ class LoginDialog(ctk.CTkToplevel):
             self,
             text="New User?",
             font=("Segoe UI", 13, "underline"),
-            text_color=LINK_COLOR,
+            text_color=self.link_color,
             cursor="hand2"
         )
         new_user_label.grid(row=3, column=0, pady=(SPACING_MD, 0), sticky="ew")
