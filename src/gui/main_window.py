@@ -1,21 +1,23 @@
-import customtkinter as ctk
+import customtkinter as ctk  # noqa
 from tkinter import ttk
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "core"))
-from db import fetch_all_bills, insert_bill, update_bill, delete_bill, fetch_all_categories, fetch_all_payment_methods
+from ..core.db import fetch_all_bills, insert_bill, update_bill, delete_bill, fetch_all_categories, fetch_all_payment_methods
 from datetime import datetime, timedelta
 from tkinter import StringVar
 from tkinter import IntVar
 import re
 import csv
 from tkinter import filedialog
-from tkcalendar import DateEntry
+from tkcalendar import DateEntry  # noqa
 from tkinter import messagebox
 from .icon_utils import icon_manager, ICON_ADD, ICON_EDIT, ICON_DELETE, ICON_SAVE, ICON_CANCEL, ICON_SEARCH, ICON_CALENDAR, ICON_EXPORT, ICON_IMPORT, ICON_REFRESH, ICON_SETTINGS, ICON_CATEGORIES, ICON_BILLS, ICON_APPLY, ICON_CLEAR
 from .validation import BillValidator, CategoryValidator, ValidationError, validate_field_in_real_time
 from .notification_dialog import NotificationManager
 from ..core.reminder_service import ReminderService
+from ..core.auth import auth_manager, AuthenticationError
+from .login_dialog import LoginDialog, ChangePasswordDialog
 from customtkinter import CTkComboBox
 
 BILLING_CYCLES = [
@@ -743,7 +745,7 @@ class EditCategoryDialog(ctk.CTkToplevel):
         
         # Error label
         self.error_label = ctk.CTkLabel(self, text="", text_color="red")
-        self.error_label.grid(row=row, column=0, columnspan=2)
+        self.error_label.grid(row=row, column=0, columnspan=2)  # noqa
         row += 1
         
         # Save button with icon
@@ -797,6 +799,10 @@ class MainWindow(ctk.CTk):
         # Configure the main window
         self.configure(bg_color=BACKGROUND_COLOR)
         
+        # Authentication
+        self.current_user = None
+        self.session_token = None
+        
         # Cerrar toda la app si se cierra la ventana principal
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         
@@ -848,8 +854,8 @@ class MainWindow(ctk.CTk):
         # Setup UI
         self._setup_ui()
         
-        # Show bills view by default
-        self.show_bills_view()
+        # Check authentication
+        self._check_authentication()
         
         # Start reminder service
         try:
@@ -895,6 +901,46 @@ class MainWindow(ctk.CTk):
                 height=40
             )
             btn.grid(row=i, column=0, sticky="ew", padx=SPACING_SM, pady=SPACING_XS)
+        
+        # Authentication buttons (bottom of sidebar)
+        auth_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent")
+        auth_frame.grid(row=7, column=0, sticky="ew", padx=SPACING_SM, pady=SPACING_MD)
+        auth_frame.grid_columnconfigure(0, weight=1)
+        
+        # User info label
+        self.user_info_label = ctk.CTkLabel(
+            auth_frame,
+            text="Not logged in",
+            text_color="white",
+            font=("Arial", 10)
+        )
+        self.user_info_label.grid(row=0, column=0, pady=(0, SPACING_SM))
+        
+        # Change password button
+        self.change_password_btn = ctk.CTkButton(
+            auth_frame,
+            text="Change Password",
+            command=self._show_change_password_dialog,
+            fg_color="transparent",
+            text_color="white",
+            hover_color=SECONDARY_COLOR,
+            anchor="w",
+            height=30
+        )
+        self.change_password_btn.grid(row=1, column=0, sticky="ew", pady=SPACING_XS)
+        
+        # Logout button
+        self.logout_btn = ctk.CTkButton(
+            auth_frame,
+            text="Logout",
+            command=self._logout,
+            fg_color="transparent",
+            text_color="white",
+            hover_color=ERROR_COLOR,
+            anchor="w",
+            height=30
+        )
+        self.logout_btn.grid(row=2, column=0, sticky="ew", pady=SPACING_XS)
         
         # Main content area with improved responsive design
         self.content = ctk.CTkFrame(self, fg_color="transparent")
@@ -1537,6 +1583,10 @@ class MainWindow(ctk.CTk):
         
         # About Section
         self._create_about_section(settings_frame)
+        
+        # User Management Section (admin only)
+        if auth_manager.is_admin(self.current_user):
+            self._create_user_management_section(settings_frame)
     
     def _create_theme_section(self, parent):
         """Create theme settings section"""
@@ -1820,6 +1870,79 @@ class MainWindow(ctk.CTk):
             text_color="gray"
         ).pack(pady=SPACING_SM)
     
+    def _create_user_management_section(self, parent):
+        """Create user management section (admin only)"""
+        # User management section header
+        user_header = ctk.CTkLabel(
+            parent,
+            text="👥 User Management",
+            font=("Arial", 16, "bold"),
+            text_color=PRIMARY_COLOR
+        )
+        user_header.pack(pady=(SPACING_LG, SPACING_SM), anchor="w")
+        
+        # User management frame
+        user_frame = ctk.CTkFrame(parent)
+        user_frame.pack(fill="x", pady=SPACING_SM, padx=SPACING_SM)
+        
+        # Current user info
+        if self.current_user:
+            user_info = auth_manager.get_user_info(self.current_user['user_id'])
+            if user_info:
+                ctk.CTkLabel(
+                    user_frame,
+                    text=f"Current User: {user_info['username']} ({user_info['role']})",
+                    font=("Arial", 12)
+                ).pack(pady=SPACING_SM)
+                
+                ctk.CTkLabel(
+                    user_frame,
+                    text=f"Account created: {user_info['created_at'][:10]}",
+                    font=("Arial", 10),
+                    text_color="gray"
+                ).pack(pady=SPACING_SM)
+        
+        # Admin actions frame
+        admin_actions_frame = ctk.CTkFrame(user_frame)
+        admin_actions_frame.pack(fill="x", pady=SPACING_SM, padx=SPACING_SM)
+        
+        # Create user button
+        create_user_btn = ctk.CTkButton(
+            admin_actions_frame,
+            text="Create New User",
+            command=self._show_create_user_dialog,
+            fg_color=SUCCESS_COLOR,
+            text_color="white",
+            width=150
+        )
+        create_user_btn.pack(side="left", padx=SPACING_SM)
+        
+        # Manage users button
+        manage_users_btn = ctk.CTkButton(
+            admin_actions_frame,
+            text="Manage Users",
+            command=self._show_manage_users_dialog,
+            fg_color=PRIMARY_COLOR,
+            text_color="white",
+            width=150
+        )
+        manage_users_btn.pack(side="left", padx=SPACING_SM)
+    
+    def _show_create_user_dialog(self):
+        """Show dialog to create a new user"""
+        from .login_dialog import RegisterDialog
+        
+        def on_success(username):
+            show_popup(self, "Success", f"User '{username}' created successfully!", color="green")
+        
+        RegisterDialog(self, on_success)
+    
+    def _show_manage_users_dialog(self):
+        """Show dialog to manage users"""
+        # This would be a more complex dialog showing all users
+        # For now, just show a simple message
+        show_popup(self, "Info", "User management dialog would be implemented here.", color="blue")
+    
     def _change_theme(self, theme):
         """Change the application theme"""
         try:
@@ -2058,6 +2181,57 @@ class MainWindow(ctk.CTk):
             config_manager.set_theme(theme)
         except Exception as e:
             print(f"Error saving theme preference: {e}")
+    
+    def _check_authentication(self):
+        """Check if user is authenticated"""
+        # For now, always show login dialog
+        # In a real app, you'd check for saved session tokens
+        self._show_login_dialog()
+    
+    def _show_login_dialog(self):
+        """Show login dialog"""
+        LoginDialog(self, self._on_login_success)
+    
+    def _on_login_success(self, user_data):
+        """Handle successful login"""
+        self.current_user = user_data
+        self.session_token = user_data.get('session_token')
+        
+        # Update window title with username
+        username = user_data.get('username', 'Guest')
+        self.title(f"Bills Tracker v3 - {username}")
+        
+        # Update user info label
+        role = user_data.get('role', 'user').title()
+        self.user_info_label.configure(text=f"Logged in as: {username}\nRole: {role}")
+        
+        # Show bills view
+        self.show_bills_view()
+        
+        # Show welcome message
+        show_popup(self, "Welcome", f"Welcome back, {username}!", color="green")
+    
+    def _logout(self):
+        """Logout current user"""
+        if self.session_token:
+            auth_manager.logout(self.session_token)
+        
+        self.current_user = None
+        self.session_token = None
+        self.title("Bills Tracker v3")
+        
+        # Clear content and show login
+        self.clear_content()
+        self._show_login_dialog()
+    
+    def _show_change_password_dialog(self):
+        """Show change password dialog"""
+        if self.current_user:
+            ChangePasswordDialog(self, self.current_user['user_id'], self._on_password_changed)
+    
+    def _on_password_changed(self):
+        """Handle successful password change"""
+        show_popup(self, "Success", "Password changed successfully!", color="green")
 
     def edit_selected_bill(self):
         selected = self.bills_table.selection()

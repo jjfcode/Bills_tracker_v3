@@ -107,7 +107,7 @@ This document outlines the next steps and features to implement for the Bills Tr
 - [x] Category and payment method management
 - [x] Reminders and notifications (desktop popups) ✅ **COMPLETED**
 - [x] Settings panel (theme, backup, etc.) ✅ **COMPLETED**
-- [ ] User authentication (optional)
+- [x] User authentication (optional) ✅ **COMPLETED**
 
 ## 6. Code Quality & Testing
 - [ ] Refactor code for modularity and maintainability
@@ -246,4 +246,30 @@ This document outlines the next steps and features to implement for the Bills Tr
 
 ---
 
-*Last updated: December 2024 - Reminders & Notifications Complete! 🎉* 
+*Last updated: December 2024 - Reminders & Notifications Complete! 🎉*
+
+# Future Coding Ideas & Improvements
+
+## Authentication & User Management
+- [x] User authentication (optional) — Implemented! ✅
+- Modern, secure authentication system with optional user registration and admin roles.
+- Login and registration dialogs now feature:
+  - Rounded corners, subtle borders, and light backgrounds for a modern look
+  - Modern fonts and vibrant button/link colors
+  - 'New User?' is a clickable, blue, underlined link
+  - Entry fields and error messages styled for clarity
+- Similar UI improvements can be applied to the registration and password dialogs for a consistent, professional feel.
+
+## Additional UI/UX Enhancements (Planned)
+- Consistent modern styling for all dialogs (registration, password change, etc.)
+- Responsive layouts for all screens
+- Improved accessibility (keyboard navigation, color contrast)
+- Customizable themes (light/dark, accent color)
+- Animated transitions for dialogs and notifications
+
+## Other Future Features
+- User profile management (change email, avatar, etc.)
+- Two-factor authentication (2FA)
+- Activity logging and audit trails
+- User permissions and granular access control
+- API for external integrations 

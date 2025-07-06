@@ -88,6 +88,15 @@ def initialize_database():
     cursor.execute(BILLS_SCHEMA)
     cursor.execute(TEMPLATES_SCHEMA)
     
+    # Initialize authentication tables
+    try:
+        from .auth import USERS_SCHEMA, SESSIONS_SCHEMA
+        cursor.execute(USERS_SCHEMA)
+        cursor.execute(SESSIONS_SCHEMA)
+    except ImportError:
+        # Auth module not available, skip
+        pass
+    
     # Insert default categories if they don't exist
     default_categories = [
         ("Utilities", "#ff6b6b", "Electricity, water, gas, internet"),

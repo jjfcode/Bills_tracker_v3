@@ -391,3 +391,25 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 **Bills Tracker v3** - Modern bill management with intuitive date selection! 💰📊📅 
+
+## Modern Authentication & UI
+- The login and registration dialogs now feature:
+  - Rounded corners, subtle borders, and light backgrounds
+  - Modern fonts and vibrant button/link colors
+  - 'New User?' is a clickable, blue, underlined link
+  - Entry fields and error messages styled for clarity
+- The UI is more visually appealing and accessible
+- Similar improvements are planned for all dialogs (registration, password change, etc.)
+
+## Getting Started
+1. Run `main_desktop.py`
+2. Log in with your credentials or register a new user via the 'New User?' link
+3. Enjoy a modern, secure, and user-friendly experience
+
+## Future Plans
+- Consistent modern styling for all dialogs
+- More user management features
+- Customizable themes
+- Enhanced accessibility
+
+See `docs/features/AUTHENTICATION.md` for more details on authentication. 
