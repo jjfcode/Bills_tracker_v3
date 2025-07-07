@@ -1,0 +1,18 @@
+# Bills Tracker v3 - macOS Build Requirements
+
+# Core application dependencies
+customtkinter>=5.2.0
+cryptography
+tkcalendar>=1.6.1
+Pillow>=10.0.0
+
+# Build tools
+pyinstaller>=5.0.0
+
+# Optional: DMG creation
+# create-dmg (install via: brew install create-dmg)
+
+# Testing dependencies (optional for build)
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-mock>=3.10.0 
