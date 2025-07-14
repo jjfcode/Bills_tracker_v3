@@ -46,11 +46,16 @@ A modern, feature-rich desktop application for managing bills and recurring paym
 
 ### 🔍 **Advanced Search & Filtering** 🆕
 - **Default Pending View** - Shows only unpaid bills by default for daily use
-- **Status Filtering** - Filter by Pending, Paid, or All bills
+- **Status Filtering** - Filter by Pending, Paid, Auto-Pay, or All bills:
+  - **Pending** - All unpaid bills (both regular pending and auto-pay)
+  - **Auto-Pay** - Only unpaid bills with automatic payment methods
+  - **Paid** - Only paid bills
+  - **All** - All bills regardless of status
 - **Period Filtering** - Filter by time periods:
   - **This Month** - Current month bills
   - **Last Month** - Previous month bills  
   - **Previous Month** - Two months ago
+  - **Next Month** - Next month bills
   - **This Year** - Current year bills
   - **Last Year** - Previous year bills
 - **Combined Filtering** - Use status, period, and search filters together
@@ -58,7 +63,8 @@ A modern, feature-rich desktop application for managing bills and recurring paym
 - **Multi-field Search** - Search by Name, Due Date, Category, Status, or Paid status
 - **Smart Filtering** - Maintains sort order while filtering
 - **Bill Counter** - Shows exactly how many bills are being displayed
-- **Clear Filters** - Reset to default view or clear specific filters
+- **Apply Button** - Apply the selected Status and Period filters
+- **Clear Button** - Reset to default view (Pending bills only)
 
 ### 📊 **Data Management**
 - **Table Sorting** - Click any column header to sort (ascending/descending with arrow indicators)

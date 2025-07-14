@@ -11,6 +11,10 @@ Demo scripts showcase specific features and help users understand how to use the
 - `demo_confirmation_number.py` - Demonstrates payment confirmation number feature
 - `demo_date_selector.py` - Shows advanced date selection capabilities
 - `demo_advanced_filtering.py` - Demonstrates filtering and search features
+- `demo_next_month_filter.py` - Tests the "Next Month" filter functionality
+- `demo_reminders_notifications.py` - Shows reminder and notification features
+- `demo_filter_fix.py` - Tests the filtering fix for Pending + This Month
+- `demo_apply_button.py` - Tests the new Apply button functionality
 
 ## Usage
 
@@ -21,6 +25,10 @@ cd demo
 python demo_confirmation_number.py
 python demo_date_selector.py
 python demo_advanced_filtering.py
+python demo_next_month_filter.py
+python demo_reminders_notifications.py
+python demo_filter_fix.py
+python demo_apply_button.py
 ```
 
 ## Demo Categories
@@ -81,6 +89,50 @@ python demo/demo_next_month_filter.py
 2. Tests the next month filtering logic
 3. Shows all bills in the database
 4. Provides instructions for testing the UI filter
+
+### 2. Apply Button Demo
+**File:** `demo_apply_button.py`
+
+Tests the new Apply button functionality.
+
+**Features:**
+- Creates test bills for different scenarios (this month, other months, paid/unpaid)
+- Tests different Status and Period filter combinations
+- Demonstrates user control over filter application
+
+**Usage:**
+```bash
+cd Bills_tracker_v3
+python demo/demo_apply_button.py
+```
+
+**What it does:**
+1. Creates test bills with various statuses and due dates
+2. Tests different filter combinations (Pending+This Month, Auto-Pay+This Month, etc.)
+3. Verifies that Apply button works with any Status/Period combination
+4. Confirms that filters are not applied automatically
+
+### 3. Filter Fix Demo
+**File:** `demo_filter_fix.py`
+
+Tests the fix for the "Pending" + "This Month" filtering issue.
+
+**Features:**
+- Demonstrates the difference between old and new filtering logic
+- Shows how auto-pay bills are now included in "Pending" status
+- Verifies the fix works correctly
+
+**Usage:**
+```bash
+cd Bills_tracker_v3
+python demo/demo_filter_fix.py
+```
+
+**What it does:**
+1. Creates test bills with different payment methods
+2. Compares old vs new filtering logic
+3. Verifies that auto-pay bills are now included in "Pending" status
+4. Confirms the fix resolves the original issue
 
 ## Running the Demos
 

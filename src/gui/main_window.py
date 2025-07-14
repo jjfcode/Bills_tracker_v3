@@ -1321,17 +1321,18 @@ class MainWindow(ctk.CTk):
         status_combo = CTkComboBox(filter_frame, variable=self.status_filter_var,
                                    values=["Pending", "Auto-Pay", "Paid", "All"], width=120, fg_color=entry_bg, text_color=entry_fg, dropdown_fg_color=entry_bg, dropdown_text_color=entry_fg)
         status_combo.grid(row=0, column=1, padx=SPACING_SM, pady=SPACING_SM, sticky="w")
-        status_combo.bind("<<ComboboxSelected>>", self.apply_filters)
         
         ctk.CTkLabel(filter_frame, text="Period:", text_color=button_fg).grid(row=0, column=2, padx=(SPACING_MD, SPACING_SM), pady=SPACING_SM)
         self.period_filter_var = ctk.StringVar(value="All")
         period_combo = CTkComboBox(filter_frame, variable=self.period_filter_var,
                                    values=["All", "This Month", "Last Month", "Previous Month", "Next Month", "This Year", "Last Year"], width=150, fg_color=entry_bg, text_color=entry_fg, dropdown_fg_color=entry_bg, dropdown_text_color=entry_fg)
         period_combo.grid(row=0, column=3, padx=SPACING_SM, pady=SPACING_SM)
-        period_combo.bind("<<ComboboxSelected>>", self.apply_filters)
         
-        clear_btn = ctk.CTkButton(filter_frame, text="Clear All", command=self.clear_all_filters, width=80, fg_color=button_bg, text_color=button_fg, hover_color=SECONDARY_COLOR)
-        clear_btn.grid(row=0, column=4, padx=SPACING_SM, pady=SPACING_SM)
+        apply_btn = ctk.CTkButton(filter_frame, text="Apply", command=self.apply_filters, width=80, fg_color=PRIMARY_COLOR, text_color="white", hover_color=SECONDARY_COLOR)
+        apply_btn.grid(row=0, column=4, padx=SPACING_SM, pady=SPACING_SM)
+        
+        clear_btn = ctk.CTkButton(filter_frame, text="Clear", command=self.clear_all_filters, width=80, fg_color=button_bg, text_color=button_fg, hover_color=SECONDARY_COLOR)
+        clear_btn.grid(row=0, column=5, padx=SPACING_SM, pady=SPACING_SM)
 
         # Search bar
         search_frame = ctk.CTkFrame(self.content, fg_color=button_bg, border_color=border_color, border_width=1)
@@ -1516,10 +1517,13 @@ class MainWindow(ctk.CTk):
         # Apply status filter
         status_filter = self.status_filter_var.get()
         if status_filter == "Pending":
-            filtered_bills = [bill for bill in filtered_bills if not bill.get("paid", False) and not bill.get("payment_method_automatic", False)]
+            # Show all unpaid bills (both regular pending and auto-pay)
+            filtered_bills = [bill for bill in filtered_bills if not bill.get("paid", False)]
         elif status_filter == "Auto-Pay":
+            # Show only unpaid bills with automatic payment methods
             filtered_bills = [bill for bill in filtered_bills if not bill.get("paid", False) and bill.get("payment_method_automatic", False)]
         elif status_filter == "Paid":
+            # Show only paid bills
             filtered_bills = [bill for bill in filtered_bills if bill.get("paid", False)]
         # "All" means no status filtering
         
@@ -1642,7 +1646,8 @@ class MainWindow(ctk.CTk):
         self.search_var.set("")
         self.status_filter_var.set("Pending")
         self.period_filter_var.set("All")
-        self._filtered_bills = [bill for bill in self._bills_data if not bill.get("paid", False) and not bill.get("payment_method_automatic", False)]
+        # Show all unpaid bills (both regular pending and auto-pay) as default
+        self._filtered_bills = [bill for bill in self._bills_data if not bill.get("paid", False)]
         
         # Clear selection and reset pagination when filters change
         self._selected_bills.clear()

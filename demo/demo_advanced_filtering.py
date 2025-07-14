@@ -7,7 +7,7 @@ This script demonstrates:
 2. Status filtering (Pending, Paid, Auto-Pay, All)
 3. Period filtering (This Month, Last Month, etc.)
 4. Combined filtering (status + period + search)
-5. Bill counter and clear filter options
+5. Bill counter and quick filter options
 """
 
 import sys
@@ -211,7 +211,8 @@ def demo_advanced_filtering():
     print("3. Use the Period dropdown to filter by time periods")
     print("4. Use the search bar to find specific bills")
     print("5. Combine filters for precise results")
-    print("6. Use 'Clear All' to reset to default pending view")
+    print("6. Use 'Apply' button to apply selected Status and Period filters")
+    print("7. Use 'Clear' button to reset to default view")
 
 if __name__ == "__main__":
     demo_advanced_filtering() 
