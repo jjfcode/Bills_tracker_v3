@@ -5,12 +5,13 @@ UI helper functions for Bills Tracker application.
 import customtkinter as ctk
 from typing import Optional, Callable
 from .constants import *
+from .transition_utils import show_fade_popup, show_fade_confirmation_dialog
 
 
 def show_popup(master, title: str, message: str, color: str = "green", 
                callback: Optional[Callable] = None) -> None:
     """
-    Show a popup message with consistent styling.
+    Show a popup message with consistent styling and fade transitions.
     
     Args:
         master: Parent widget
@@ -19,45 +20,13 @@ def show_popup(master, title: str, message: str, color: str = "green",
         color: Text color
         callback: Optional callback to execute when popup is closed
     """
-    try:
-        popup = ctk.CTkToplevel(master)
-        popup.title(title)
-        popup.geometry("350x120")
-        
-        def close_popup():
-            try:
-                if popup.winfo_exists():
-                    popup.destroy()
-                    if callback:
-                        callback()
-            except:
-                pass
-        
-        label = ctk.CTkLabel(popup, text=message, text_color=color, font=("Arial", 14))
-        label.pack(pady=20)
-        ctk.CTkButton(popup, text="OK", command=close_popup).pack(pady=10)
-        
-        # Use after() to delay the focus operations
-        def set_focus():
-            try:
-                if popup.winfo_exists():
-                    popup.lift()
-                    popup.focus_force()
-                    popup.grab_set()
-            except:
-                pass
-        
-        popup.after(100, set_focus)
-        
-    except Exception as e:
-        # If popup creation fails, just print the message to console
-        print(f"Popup Error: {title} - {message}")
+    show_fade_popup(master, title, message, color, 300, callback)
 
 
 def show_confirmation_dialog(master, title: str, message: str, 
                            on_confirm: Callable, on_cancel: Optional[Callable] = None) -> None:
     """
-    Show a confirmation dialog with consistent styling.
+    Show a confirmation dialog with consistent styling and fade transitions.
     
     Args:
         master: Parent widget
@@ -66,61 +35,7 @@ def show_confirmation_dialog(master, title: str, message: str,
         on_confirm: Callback for confirm action
         on_cancel: Optional callback for cancel action
     """
-    try:
-        dialog = ctk.CTkToplevel(master)
-        dialog.title(title)
-        dialog.geometry("400x150")
-        dialog.transient(master)
-        dialog.grab_set()
-        
-        # Center the dialog
-        dialog.update_idletasks()
-        x = (dialog.winfo_screenwidth() // 2) - (400 // 2)
-        y = (dialog.winfo_screenheight() // 2) - (150 // 2)
-        dialog.geometry(f"400x150+{x}+{y}")
-        
-        def confirm():
-            try:
-                if dialog.winfo_exists():
-                    dialog.destroy()
-                    on_confirm()
-            except:
-                pass
-        
-        def cancel():
-            try:
-                if dialog.winfo_exists():
-                    dialog.destroy()
-                    if on_cancel:
-                        on_cancel()
-            except:
-                pass
-        
-        # Message label
-        label = ctk.CTkLabel(dialog, text=message, font=("Arial", 12))
-        label.pack(pady=20)
-        
-        # Buttons
-        button_frame = ctk.CTkFrame(dialog)
-        button_frame.pack(pady=10)
-        
-        ctk.CTkButton(button_frame, text="Confirm", command=confirm, 
-                     fg_color=ERROR_COLOR, text_color="white").pack(side="left", padx=SPACING_SM)
-        ctk.CTkButton(button_frame, text="Cancel", command=cancel).pack(side="left", padx=SPACING_SM)
-        
-        # Set focus
-        def set_focus():
-            try:
-                if dialog.winfo_exists():
-                    dialog.lift()
-                    dialog.focus_force()
-            except:
-                pass
-        
-        dialog.after(100, set_focus)
-        
-    except Exception as e:
-        print(f"Confirmation Dialog Error: {title} - {message}")
+    show_fade_confirmation_dialog(master, title, message, on_confirm, on_cancel, 300)
 
 
 def center_window(window, width: int, height: int) -> None:

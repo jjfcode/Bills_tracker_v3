@@ -270,10 +270,48 @@ class AddBillDialog(ctk.CTkToplevel):
         self.title("Add Bill")
         self.geometry("550x700")
         self.on_success = on_success
-        self._setup_ui()
-        self.lift()
-        self.focus_force()
+        
+        # Center the dialog
+        self.update_idletasks()
+        x = (self.winfo_screenwidth() // 2) - (550 // 2)
+        y = (self.winfo_screenheight() // 2) - (700 // 2)
+        self.geometry(f"550x700+{x}+{y}")
+        
+        # Make dialog modal
+        self.transient(master)
         self.grab_set()
+        self.lift()
+        
+        # Setup fade transitions
+        from ..utils.transition_utils import TransitionManager
+        self.transition_manager = TransitionManager(self, 300)
+        
+        self._setup_ui()
+        
+        # Start fade in animation
+        self.after(50, self._start_fade_in)
+    
+    def _start_fade_in(self):
+        """Start the fade in animation."""
+        if self.transition_manager:
+            self.transition_manager.fade_in()
+    
+    def _fade_out_and_destroy(self, callback=None):
+        """Fade out the dialog and then destroy it."""
+        if self.transition_manager:
+            self.transition_manager.fade_out(lambda: self._destroy_with_callback(callback))
+        else:
+            self._destroy_with_callback(callback)
+    
+    def _destroy_with_callback(self, callback=None):
+        """Destroy the dialog and execute callback."""
+        try:
+            if self.winfo_exists():
+                self.destroy()
+                if callback:
+                    callback()
+        except:
+            pass
 
     def _setup_ui(self):
         """
@@ -447,7 +485,7 @@ class AddBillDialog(ctk.CTkToplevel):
             insert_bill(validated_data)
                             # Success popup removed for faster workflow
             self.on_success()
-            self.destroy()
+            self._fade_out_and_destroy()
             
         except ValidationError as e:
             # Show validation error
@@ -501,10 +539,48 @@ class EditBillDialog(ctk.CTkToplevel):
         self.geometry("550x700")
         self.bill_data = bill_data
         self.on_success = on_success
-        self._setup_ui()
-        self.lift()
-        self.focus_force()
+        
+        # Center the dialog
+        self.update_idletasks()
+        x = (self.winfo_screenwidth() // 2) - (550 // 2)
+        y = (self.winfo_screenheight() // 2) - (700 // 2)
+        self.geometry(f"550x700+{x}+{y}")
+        
+        # Make dialog modal
+        self.transient(master)
         self.grab_set()
+        self.lift()
+        
+        # Setup fade transitions
+        from ..utils.transition_utils import TransitionManager
+        self.transition_manager = TransitionManager(self, 300)
+        
+        self._setup_ui()
+        
+        # Start fade in animation
+        self.after(50, self._start_fade_in)
+    
+    def _start_fade_in(self):
+        """Start the fade in animation."""
+        if self.transition_manager:
+            self.transition_manager.fade_in()
+    
+    def _fade_out_and_destroy(self, callback=None):
+        """Fade out the dialog and then destroy it."""
+        if self.transition_manager:
+            self.transition_manager.fade_out(lambda: self._destroy_with_callback(callback))
+        else:
+            self._destroy_with_callback(callback)
+    
+    def _destroy_with_callback(self, callback=None):
+        """Destroy the dialog and execute callback."""
+        try:
+            if self.winfo_exists():
+                self.destroy()
+                if callback:
+                    callback()
+        except:
+            pass
 
     def _setup_ui(self):
         """
@@ -695,7 +771,7 @@ class EditBillDialog(ctk.CTkToplevel):
             update_bill(bill_data["id"], bill_data)
                             # Success popup removed for faster workflow
             self.on_success()
-            self.destroy()
+            self._fade_out_and_destroy()
             
         except ValidationError as e:
             # Show validation error
@@ -746,10 +822,48 @@ class AddCategoryDialog(ctk.CTkToplevel):
         self.title("Add Category")
         self.geometry("400x300")
         self.on_success = on_success
-        self._setup_ui()
-        self.lift()
-        self.focus_force()
+        
+        # Center the dialog
+        self.update_idletasks()
+        x = (self.winfo_screenwidth() // 2) - (400 // 2)
+        y = (self.winfo_screenheight() // 2) - (300 // 2)
+        self.geometry(f"400x300+{x}+{y}")
+        
+        # Make dialog modal
+        self.transient(master)
         self.grab_set()
+        self.lift()
+        
+        # Setup fade transitions
+        from ..utils.transition_utils import TransitionManager
+        self.transition_manager = TransitionManager(self, 300)
+        
+        self._setup_ui()
+        
+        # Start fade in animation
+        self.after(50, self._start_fade_in)
+    
+    def _start_fade_in(self):
+        """Start the fade in animation."""
+        if self.transition_manager:
+            self.transition_manager.fade_in()
+    
+    def _fade_out_and_destroy(self, callback=None):
+        """Fade out the dialog and then destroy it."""
+        if self.transition_manager:
+            self.transition_manager.fade_out(lambda: self._destroy_with_callback(callback))
+        else:
+            self._destroy_with_callback(callback)
+    
+    def _destroy_with_callback(self, callback=None):
+        """Destroy the dialog and execute callback."""
+        try:
+            if self.winfo_exists():
+                self.destroy()
+                if callback:
+                    callback()
+        except:
+            pass
 
     def _setup_ui(self):
         """
@@ -813,7 +927,7 @@ class AddCategoryDialog(ctk.CTkToplevel):
             insert_category(validated_data)
                             # Success popup removed for faster workflow
             self.on_success()
-            self.destroy()
+            self._fade_out_and_destroy()
             
         except ValidationError as e:
             # Show validation error
@@ -847,10 +961,48 @@ class EditCategoryDialog(ctk.CTkToplevel):
         self.geometry("400x300")
         self.category_data = category_data
         self.on_success = on_success
-        self._setup_ui()
-        self.lift()
-        self.focus_force()
+        
+        # Center the dialog
+        self.update_idletasks()
+        x = (self.winfo_screenwidth() // 2) - (400 // 2)
+        y = (self.winfo_screenheight() // 2) - (300 // 2)
+        self.geometry(f"400x300+{x}+{y}")
+        
+        # Make dialog modal
+        self.transient(master)
         self.grab_set()
+        self.lift()
+        
+        # Setup fade transitions
+        from ..utils.transition_utils import TransitionManager
+        self.transition_manager = TransitionManager(self, 300)
+        
+        self._setup_ui()
+        
+        # Start fade in animation
+        self.after(50, self._start_fade_in)
+    
+    def _start_fade_in(self):
+        """Start the fade in animation."""
+        if self.transition_manager:
+            self.transition_manager.fade_in()
+    
+    def _fade_out_and_destroy(self, callback=None):
+        """Fade out the dialog and then destroy it."""
+        if self.transition_manager:
+            self.transition_manager.fade_out(lambda: self._destroy_with_callback(callback))
+        else:
+            self._destroy_with_callback(callback)
+    
+    def _destroy_with_callback(self, callback=None):
+        """Destroy the dialog and execute callback."""
+        try:
+            if self.winfo_exists():
+                self.destroy()
+                if callback:
+                    callback()
+        except:
+            pass
 
     def _setup_ui(self):
         """
@@ -916,7 +1068,7 @@ class EditCategoryDialog(ctk.CTkToplevel):
             update_category(self.category_data["id"], validated_data)
                             # Success popup removed for faster workflow
             self.on_success()
-            self.destroy()
+            self._fade_out_and_destroy()
             
         except ValidationError as e:
             # Show validation error

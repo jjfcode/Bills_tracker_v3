@@ -165,19 +165,45 @@ class BillNotificationDialog(ctk.CTkToplevel):
             y = (self.winfo_screenheight() // 2) - (350 // 2)
             self.geometry(f"450x350+{x}+{y}")
             
+            # Setup fade transitions
+            from ..utils.transition_utils import TransitionManager
+            self.transition_manager = TransitionManager(self, 300)
+            
             # Setup UI
             self._setup_ui()
             
             # Auto-close after 30 seconds
             self.auto_close_timer = self.after(30000, self._auto_close)
             
-            # Focus and bring to front safely
-            self.after(100, self._safe_focus)
+            # Start fade in animation
+            self.after(50, self._start_fade_in)
             
         except Exception as e:
             print(f"Error creating notification dialog: {e}")
             # If we can't create the dialog, just print the notification
             print(f"NOTIFICATION: {notification_data.get('message', 'Bill reminder')}")
+    
+    def _start_fade_in(self):
+        """Start the fade in animation."""
+        if self.transition_manager:
+            self.transition_manager.fade_in()
+    
+    def _fade_out_and_destroy(self, callback=None):
+        """Fade out the dialog and then destroy it."""
+        if self.transition_manager:
+            self.transition_manager.fade_out(lambda: self._destroy_with_callback(callback))
+        else:
+            self._destroy_with_callback(callback)
+    
+    def _destroy_with_callback(self, callback=None):
+        """Destroy the dialog and execute callback."""
+        try:
+            if self.winfo_exists():
+                self.destroy()
+                if callback:
+                    callback()
+        except:
+            pass
     
     def _safe_focus(self):
         """
@@ -431,7 +457,7 @@ class BillNotificationDialog(ctk.CTkToplevel):
         
         try:
             if self.winfo_exists():
-                self.destroy()
+                self._fade_out_and_destroy()
         except:
             pass
         
@@ -446,7 +472,7 @@ class BillNotificationDialog(ctk.CTkToplevel):
         
         try:
             if self.winfo_exists():
-                self.destroy()
+                self._fade_out_and_destroy()
         except:
             pass
 

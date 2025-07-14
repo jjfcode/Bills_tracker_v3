@@ -60,13 +60,41 @@ class LoginDialog(ctk.CTkToplevel):
         self.transient(master)
         self.grab_set()
         self.lift()
-        self.focus_force()
+        
+        # Setup fade transitions
+        from ..utils.transition_utils import TransitionManager
+        self.transition_manager = TransitionManager(self, 300)
         
         # Load saved credentials
         self.saved_credentials = self._load_saved_credentials()
         
         self._setup_ui()
         self._check_remembered_user()
+        
+        # Start fade in animation
+        self.after(50, self._start_fade_in)
+    
+    def _start_fade_in(self):
+        """Start the fade in animation."""
+        if self.transition_manager:
+            self.transition_manager.fade_in()
+    
+    def _fade_out_and_destroy(self, callback=None):
+        """Fade out the dialog and then destroy it."""
+        if self.transition_manager:
+            self.transition_manager.fade_out(lambda: self._destroy_with_callback(callback))
+        else:
+            self._destroy_with_callback(callback)
+    
+    def _destroy_with_callback(self, callback=None):
+        """Destroy the dialog and execute callback."""
+        try:
+            if self.winfo_exists():
+                self.destroy()
+                if callback:
+                    callback()
+        except:
+            pass
     
     def _set_theme_colors(self):
         """
@@ -220,8 +248,7 @@ class LoginDialog(ctk.CTkToplevel):
             self.current_user = user_data
             
             # Close dialog and call success callback
-            self.destroy()
-            self.on_success(user_data)
+            self._fade_out_and_destroy(lambda: self.on_success(user_data))
             
         except AuthenticationError as e:
             self._show_error(str(e))
@@ -331,9 +358,37 @@ class RegisterDialog(ctk.CTkToplevel):
         self.transient(master)
         self.grab_set()
         self.lift()
-        self.focus_force()
+        
+        # Setup fade transitions
+        from ..utils.transition_utils import TransitionManager
+        self.transition_manager = TransitionManager(self, 300)
         
         self._setup_ui()
+        
+        # Start fade in animation
+        self.after(50, self._start_fade_in)
+    
+    def _start_fade_in(self):
+        """Start the fade in animation."""
+        if self.transition_manager:
+            self.transition_manager.fade_in()
+    
+    def _fade_out_and_destroy(self, callback=None):
+        """Fade out the dialog and then destroy it."""
+        if self.transition_manager:
+            self.transition_manager.fade_out(lambda: self._destroy_with_callback(callback))
+        else:
+            self._destroy_with_callback(callback)
+    
+    def _destroy_with_callback(self, callback=None):
+        """Destroy the dialog and execute callback."""
+        try:
+            if self.winfo_exists():
+                self.destroy()
+                if callback:
+                    callback()
+        except:
+            pass
     
     def _setup_ui(self):
         """
@@ -460,8 +515,7 @@ class RegisterDialog(ctk.CTkToplevel):
             auth_manager.register_user(username, password, email if email else None)
             
             # Close dialog and call success callback
-            self.destroy()
-            self.on_success(username)
+            self._fade_out_and_destroy(lambda: self.on_success(username))
             
         except AuthenticationError as e:
             self._show_error(str(e))
@@ -515,9 +569,37 @@ class ChangePasswordDialog(ctk.CTkToplevel):
         self.transient(master)
         self.grab_set()
         self.lift()
-        self.focus_force()
+        
+        # Setup fade transitions
+        from ..utils.transition_utils import TransitionManager
+        self.transition_manager = TransitionManager(self, 300)
         
         self._setup_ui()
+        
+        # Start fade in animation
+        self.after(50, self._start_fade_in)
+    
+    def _start_fade_in(self):
+        """Start the fade in animation."""
+        if self.transition_manager:
+            self.transition_manager.fade_in()
+    
+    def _fade_out_and_destroy(self, callback=None):
+        """Fade out the dialog and then destroy it."""
+        if self.transition_manager:
+            self.transition_manager.fade_out(lambda: self._destroy_with_callback(callback))
+        else:
+            self._destroy_with_callback(callback)
+    
+    def _destroy_with_callback(self, callback=None):
+        """Destroy the dialog and execute callback."""
+        try:
+            if self.winfo_exists():
+                self.destroy()
+                if callback:
+                    callback()
+        except:
+            pass
     
     def _setup_ui(self):
         """
@@ -632,8 +714,7 @@ class ChangePasswordDialog(ctk.CTkToplevel):
             auth_manager.change_password(self.user_id, current_password, new_password)
             
             # Close dialog and call success callback
-            self.destroy()
-            self.on_success()
+            self._fade_out_and_destroy(lambda: self.on_success())
             
         except AuthenticationError as e:
             self._show_error(str(e))
