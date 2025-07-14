@@ -215,7 +215,7 @@ class LoginDialog(ctk.CTkToplevel):
         Check if there's a remembered username and pre-fill the username entry if found.
         """
         if self.saved_credentials and 'username' in self.saved_credentials:
-            self.username_entry.insert(0, self.saved_credentials['username'])
+            self.username_entry.insert("0", self.saved_credentials['username'])
             self.remember_var.set(True)
             self.password_entry.focus()
     
@@ -283,7 +283,7 @@ class LoginDialog(ctk.CTkToplevel):
             username (str): The username of the newly registered user.
         """
         self.username_entry.delete(0, "end")
-        self.username_entry.insert(0, username)
+        self.username_entry.insert("0", username)
         self.password_entry.focus()
         self._show_error("Registration successful! Please sign in.")
     

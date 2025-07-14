@@ -65,6 +65,7 @@ A modern, feature-rich desktop application for managing bills and recurring paym
 - **Bill Counter** - Shows exactly how many bills are being displayed
 - **Apply Button** - Apply the selected Status and Period filters
 - **Clear Button** - Reset to default view (Pending bills only)
+- **Website Auto-Complete** - Smart suggestions for common bill websites as you type
 
 ### 📊 **Data Management**
 - **Table Sorting** - Click any column header to sort (ascending/descending with arrow indicators)
@@ -242,6 +243,14 @@ Bills_tracker_v3/
 - **Direct Input**: Type dates directly in YYYY-MM-DD format
 - **Fallback Picker**: Simple dropdown picker if calendar widget unavailable
 - **Validation**: Automatic validation of date format and validity
+
+### **Website Auto-Complete Features**
+- **Smart Suggestions**: Type to see suggestions for common bill websites
+- **Category-Based**: Organized by Utilities, Entertainment, Banking, Insurance, etc.
+- **Keyboard Navigation**: Use Up/Down arrows to navigate suggestions
+- **Quick Selection**: Press Enter to select or click on suggestions
+- **URL Formatting**: Automatically adds https:// if protocol is missing
+- **80+ Pre-loaded Sites**: Includes major bill providers and services
 
 ### **Managing Categories**
 1. Click "Categories" in the sidebar

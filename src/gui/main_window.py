@@ -367,9 +367,10 @@ class AddBillDialog(ctk.CTkToplevel):
         self.payment_method_combo.grid(row=row, column=1, padx=SPACING_SM, pady=SPACING_SM, sticky="ew")
         self._load_payment_methods()
         row += 1
-        # Web Page
+        # Web Page with auto-complete
         ctk.CTkLabel(self, text="Web Page:").grid(row=row, column=0, padx=SPACING_SM, pady=SPACING_SM, sticky="e")
-        self.web_page_entry = ctk.CTkEntry(self)
+        from ..utils.autocomplete_utils import create_website_autocomplete_entry
+        self.web_page_entry = create_website_autocomplete_entry(self, placeholder_text="Enter website URL...")
         self.web_page_entry.grid(row=row, column=1, padx=SPACING_SM, pady=SPACING_SM, sticky="ew")
         row += 1
         # Company Email
@@ -591,7 +592,7 @@ class EditBillDialog(ctk.CTkToplevel):
         # Name
         ctk.CTkLabel(self, text="Name:").grid(row=row, column=0, padx=SPACING_SM, pady=SPACING_SM, sticky="e")
         self.name_entry = ctk.CTkEntry(self)
-        self.name_entry.insert(0, self.bill_data.get("name", ""))
+        self.name_entry.insert("0", str(self.bill_data.get("name", "") or ""))
         self.name_entry.grid(row=row, column=1, padx=SPACING_SM, pady=SPACING_SM, sticky="ew")
         row += 1
         
@@ -611,7 +612,7 @@ class EditBillDialog(ctk.CTkToplevel):
         # Confirmation Number
         ctk.CTkLabel(self, text="Confirmation Number:").grid(row=row, column=0, padx=SPACING_SM, pady=SPACING_SM, sticky="e")
         self.confirmation_entry = ctk.CTkEntry(self, placeholder_text="Enter confirmation number...", fg_color=BACKGROUND_COLOR, text_color=TEXT_COLOR)
-        self.confirmation_entry.insert(0, self.bill_data.get("confirmation_number", ""))
+        self.confirmation_entry.insert("0", str(self.bill_data.get("confirmation_number", "") or ""))
         self.confirmation_entry.grid(row=row, column=1, padx=SPACING_SM, pady=SPACING_SM, sticky="ew")
         row += 1
         # Billing Cycle (dropdown)
@@ -631,7 +632,7 @@ class EditBillDialog(ctk.CTkToplevel):
         self.amount_entry = ctk.CTkEntry(self, placeholder_text="Enter amount...")
         amount_value = self.bill_data.get("amount")
         if amount_value:
-            self.amount_entry.insert(0, f"${amount_value:.2f}")
+            self.amount_entry.insert("0", str(f"${amount_value:.2f}"))
         self.amount_entry.grid(row=row, column=1, padx=SPACING_SM, pady=SPACING_SM, sticky="ew")
         row += 1
         # Payment Method (dropdown)
@@ -641,28 +642,29 @@ class EditBillDialog(ctk.CTkToplevel):
         self.payment_method_combo.grid(row=row, column=1, padx=SPACING_SM, pady=SPACING_SM, sticky="ew")
         self._load_payment_methods()
         row += 1
-        # Web Page
+        # Web Page with auto-complete
         ctk.CTkLabel(self, text="Web Page:").grid(row=row, column=0, padx=SPACING_SM, pady=SPACING_SM, sticky="e")
-        self.web_page_entry = ctk.CTkEntry(self)
-        self.web_page_entry.insert(0, self.bill_data.get("web_page", ""))
+        from ..utils.autocomplete_utils import create_website_autocomplete_entry
+        self.web_page_entry = create_website_autocomplete_entry(self, placeholder_text="Enter website URL...")
+        self.web_page_entry.set(self.bill_data.get("web_page") or "")
         self.web_page_entry.grid(row=row, column=1, padx=SPACING_SM, pady=SPACING_SM, sticky="ew")
         row += 1
         # Company Email
         ctk.CTkLabel(self, text="Company Email:").grid(row=row, column=0, padx=SPACING_SM, pady=SPACING_SM, sticky="e")
         self.company_email_entry = ctk.CTkEntry(self)
-        self.company_email_entry.insert(0, self.bill_data.get("company_email", ""))
+        self.company_email_entry.insert("0", str(self.bill_data.get("company_email", "") or ""))
         self.company_email_entry.grid(row=row, column=1, padx=SPACING_SM, pady=SPACING_SM, sticky="ew")
         row += 1
         # Support Phone
         ctk.CTkLabel(self, text="Support Phone:").grid(row=row, column=0, padx=SPACING_SM, pady=SPACING_SM, sticky="e")
         self.support_phone_entry = ctk.CTkEntry(self)
-        self.support_phone_entry.insert(0, self.bill_data.get("support_phone", ""))
+        self.support_phone_entry.insert("0", str(self.bill_data.get("support_phone", "") or ""))
         self.support_phone_entry.grid(row=row, column=1, padx=SPACING_SM, pady=SPACING_SM, sticky="ew")
         row += 1
         # Account Number
         ctk.CTkLabel(self, text="Account Number:").grid(row=row, column=0, padx=SPACING_SM, pady=SPACING_SM, sticky="e")
         self.account_number_entry = ctk.CTkEntry(self)
-        self.account_number_entry.insert(0, self.bill_data.get("account_number", ""))
+        self.account_number_entry.insert("0", str(self.bill_data.get("account_number", "") or ""))
         self.account_number_entry.grid(row=row, column=1, padx=SPACING_SM, pady=SPACING_SM, sticky="ew")
         row += 1
         # Category (dropdown)
@@ -1014,7 +1016,7 @@ class EditCategoryDialog(ctk.CTkToplevel):
         # Name
         ctk.CTkLabel(self, text="Name:").grid(row=row, column=0, padx=SPACING_SM, pady=SPACING_SM, sticky="e")
         self.name_entry = ctk.CTkEntry(self)
-        self.name_entry.insert(0, self.category_data.get("name", ""))
+        self.name_entry.insert("0", str(self.category_data.get("name", "") or ""))
         self.name_entry.grid(row=row, column=1, padx=SPACING_SM, pady=SPACING_SM, sticky="ew")
         row += 1
         

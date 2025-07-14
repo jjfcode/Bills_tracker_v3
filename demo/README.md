@@ -15,6 +15,7 @@ Demo scripts showcase specific features and help users understand how to use the
 - `demo_reminders_notifications.py` - Shows reminder and notification features
 - `demo_filter_fix.py` - Tests the filtering fix for Pending + This Month
 - `demo_apply_button.py` - Tests the new Apply button functionality
+- `demo_autocomplete.py` - Tests the website auto-complete functionality
 
 ## Usage
 
@@ -29,6 +30,7 @@ python demo_next_month_filter.py
 python demo_reminders_notifications.py
 python demo_filter_fix.py
 python demo_apply_button.py
+python demo_autocomplete.py
 ```
 
 ## Demo Categories
@@ -133,6 +135,29 @@ python demo/demo_filter_fix.py
 2. Compares old vs new filtering logic
 3. Verifies that auto-pay bills are now included in "Pending" status
 4. Confirms the fix resolves the original issue
+
+### 4. Auto-Complete Demo
+**File:** `demo_autocomplete.py`
+
+Tests the website auto-complete functionality.
+
+**Features:**
+- Demonstrates the auto-complete entry widget
+- Shows website suggestions by category
+- Tests search and URL formatting functionality
+- Interactive GUI for testing user experience
+
+**Usage:**
+```bash
+cd Bills_tracker_v3
+python demo/demo_autocomplete.py
+```
+
+**What it does:**
+1. Tests the WebsiteAutoComplete class functionality
+2. Demonstrates search and URL formatting
+3. Opens interactive GUI for testing auto-complete
+4. Shows category-based website filtering
 
 ## Running the Demos
 
