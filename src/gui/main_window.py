@@ -1161,11 +1161,8 @@ class MainWindow(ctk.CTk):
         # Check authentication
         self._check_authentication()
         
-        # Start reminder service
-        try:
-            self.reminder_service.start(notification_callback=self._handle_reminder_notification)
-        except Exception as e:
-            print(f"Error starting reminder service: {e}")
+        # Reminder service disabled
+        print("Reminder service disabled - no popup notifications will be shown")
     
     def _setup_ui(self):
         """

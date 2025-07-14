@@ -151,7 +151,7 @@ class BillNotificationDialog(ctk.CTkToplevel):
             self.on_snooze = on_snooze
             self._destroyed = False
             
-            # Configure window
+            # Configure window - simplified
             self.title(notification_data.get('title', 'Bill Reminder'))
             self.geometry("450x350")
             self.resizable(False, False)
@@ -165,18 +165,18 @@ class BillNotificationDialog(ctk.CTkToplevel):
             y = (self.winfo_screenheight() // 2) - (350 // 2)
             self.geometry(f"450x350+{x}+{y}")
             
-            # Setup fade transitions
-            from ..utils.transition_utils import TransitionManager
-            self.transition_manager = TransitionManager(self, 300)
-            
-            # Setup UI
+            # Setup UI first
             self._setup_ui()
+            
+            # Disable all complex features that might interfere
+            self.transition_manager = None
+            print("[DEBUG] All complex features disabled for button testing")
             
             # Auto-close after 30 seconds
             self.auto_close_timer = self.after(30000, self._auto_close)
             
-            # Start fade in animation
-            self.after(50, self._start_fade_in)
+            # Simple focus without complex handling
+            self.after(100, lambda: self.lift() and self.focus_force())
             
         except Exception as e:
             print(f"Error creating notification dialog: {e}")
@@ -205,6 +205,33 @@ class BillNotificationDialog(ctk.CTkToplevel):
         except:
             pass
     
+    def _fix_dpi_scaling(self):
+        """
+        Fix DPI scaling issues that can interfere with button clicks.
+        """
+        try:
+            if not self._destroyed and self.winfo_exists():
+                # Force update to prevent DPI scaling errors
+                self.update_idletasks()
+                # Ensure proper scaling
+                self.update()
+                print("[DEBUG] DPI scaling fixed for notification")
+        except Exception as e:
+            print(f"Error fixing DPI scaling: {e}")
+    
+    def _ensure_clickable(self):
+        """
+        Ensure the window is properly focused and clickable.
+        """
+        try:
+            if not self._destroyed and self.winfo_exists():
+                self.lift()
+                self.focus_force()
+                # Don't use grab_set() as it can interfere with button clicks
+                print("[DEBUG] Notification window made clickable")
+        except Exception as e:
+            print(f"Error making notification clickable: {e}")
+    
     def _safe_focus(self):
         """
         Safely focus and lift the window to ensure it's visible to the user.
@@ -220,10 +247,7 @@ class BillNotificationDialog(ctk.CTkToplevel):
         """
         Setup the notification UI with header, message, details, and action buttons.
         """
-        # Configure grid
-        self.grid_rowconfigure(3, weight=1)
-        self.grid_columnconfigure(0, weight=1)
-        
+        # Use pack instead of grid for simpler layout
         # Header with urgency indicator
         self._setup_header()
         
@@ -241,8 +265,7 @@ class BillNotificationDialog(ctk.CTkToplevel):
         Setup the header section with urgency indicator and close button.
         """
         header_frame = ctk.CTkFrame(self, fg_color="transparent")
-        header_frame.grid(row=0, column=0, sticky="ew", padx=SPACING_MD, pady=(SPACING_MD, SPACING_SM))
-        header_frame.grid_columnconfigure(1, weight=1)
+        header_frame.pack(fill="x", padx=SPACING_MD, pady=(SPACING_MD, SPACING_SM))
         
         # Urgency icon and color
         urgency = self.notification_data.get('urgency', 'REMINDER')
@@ -263,7 +286,7 @@ class BillNotificationDialog(ctk.CTkToplevel):
             font=("Arial", 16, "bold"),
             text_color=color
         )
-        urgency_label.grid(row=0, column=0, sticky="w", padx=(0, SPACING_SM))
+        urgency_label.pack(side="left", padx=(0, SPACING_SM))
         
         # Close button
         close_btn = ctk.CTkButton(
@@ -276,15 +299,17 @@ class BillNotificationDialog(ctk.CTkToplevel):
             text_color=TEXT_COLOR,
             hover_color=ERROR_COLOR
         )
-        close_btn.grid(row=0, column=2, sticky="e")
+        close_btn.pack(side="right")
+        
+        # Bind close button to window close event
+        self.protocol("WM_DELETE_WINDOW", self._close_notification)
         
     def _setup_message(self):
         """
         Setup the main message section with notification text and bill name.
         """
         message_frame = ctk.CTkFrame(self, fg_color="transparent")
-        message_frame.grid(row=1, column=0, sticky="ew", padx=SPACING_MD, pady=SPACING_SM)
-        message_frame.grid_columnconfigure(0, weight=1)
+        message_frame.pack(fill="x", padx=SPACING_MD, pady=SPACING_SM)
         
         # Main message
         message = self.notification_data.get('message', '')
@@ -295,7 +320,7 @@ class BillNotificationDialog(ctk.CTkToplevel):
             text_color=TEXT_COLOR,
             wraplength=400
         )
-        message_label.grid(row=0, column=0, sticky="w", pady=(0, SPACING_SM))
+        message_label.pack(anchor="w", pady=(0, SPACING_SM))
         
         # Bill name
         bill_name = self.notification_data.get('bill_name', '')
@@ -305,15 +330,14 @@ class BillNotificationDialog(ctk.CTkToplevel):
             font=("Arial", 12),
             text_color=TEXT_COLOR
         )
-        bill_label.grid(row=1, column=0, sticky="w")
+        bill_label.pack(anchor="w")
         
     def _setup_details(self):
         """
         Setup the bill details section with additional information.
         """
         details_frame = ctk.CTkFrame(self, fg_color=BACKGROUND_COLOR)
-        details_frame.grid(row=2, column=0, sticky="ew", padx=SPACING_MD, pady=SPACING_SM)
-        details_frame.grid_columnconfigure(0, weight=1)
+        details_frame.pack(fill="x", padx=SPACING_MD, pady=SPACING_SM)
         
         # Details text
         details = self.notification_data.get('details', '')
@@ -325,50 +349,71 @@ class BillNotificationDialog(ctk.CTkToplevel):
             justify="left",
             wraplength=400
         )
-        details_label.grid(row=0, column=0, sticky="w", padx=SPACING_SM, pady=SPACING_SM)
+        details_label.pack(anchor="w", padx=SPACING_SM, pady=SPACING_SM)
         
     def _setup_actions(self):
         """
         Setup the action buttons section with mark paid, snooze, website, and email buttons.
         """
         actions_frame = ctk.CTkFrame(self, fg_color="transparent")
-        actions_frame.grid(row=3, column=0, sticky="ew", padx=SPACING_MD, pady=SPACING_SM)
-        actions_frame.grid_columnconfigure(4, weight=1)
+        actions_frame.pack(fill="x", padx=SPACING_MD, pady=SPACING_SM)
         
-        # Mark as paid button
-        mark_paid_btn = ctk.CTkButton(
+        # Mark as paid button - using tkinter Button instead of CTkButton
+        import tkinter as tk
+        mark_paid_btn = tk.Button(
             actions_frame,
             text="Mark Paid",
             command=self._mark_as_paid,
-            fg_color=SUCCESS_COLOR,
-            text_color="white",
-            height=35
+            bg=SUCCESS_COLOR,
+            fg="white",
+            height=1,
+            width=10,
+            relief="raised",
+            borderwidth=2
         )
-        mark_paid_btn.grid(row=0, column=0, padx=SPACING_XS, pady=SPACING_SM)
+        mark_paid_btn.pack(side="left", padx=2, pady=SPACING_SM, fill="x", expand=True)
         
-        # Snooze button
-        snooze_btn = ctk.CTkButton(
+        # Test binding to see if button receives events
+        mark_paid_btn.bind("<Button-1>", lambda e: print("[DEBUG] Mark Paid button clicked via binding"))
+        
+        # Print button info for debugging
+        self.after(100, lambda: print(f"[DEBUG] Mark Paid button: x={mark_paid_btn.winfo_x()}, y={mark_paid_btn.winfo_y()}, width={mark_paid_btn.winfo_width()}, height={mark_paid_btn.winfo_height()}"))
+        
+        # Snooze button - using tkinter Button
+        snooze_btn = tk.Button(
             actions_frame,
             text="Snooze 1h",
             command=self._snooze_reminder,
-            fg_color=WARNING_COLOR,
-            text_color="white",
-            height=35
+            bg=WARNING_COLOR,
+            fg="white",
+            height=1,
+            width=10,
+            relief="raised",
+            borderwidth=2
         )
-        snooze_btn.grid(row=0, column=1, padx=SPACING_XS, pady=SPACING_SM)
+        snooze_btn.pack(side="left", padx=2, pady=SPACING_SM, fill="x", expand=True)
         
-        # Website button (if available)
+        # Test binding to see if button receives events
+        snooze_btn.bind("<Button-1>", lambda e: print("[DEBUG] Snooze button clicked via binding"))
+        
+        # Website button (if available) - using tkinter Button
         web_page = self.notification_data.get('web_page')
         if web_page:
-            website_btn = ctk.CTkButton(
+            website_btn = tk.Button(
                 actions_frame,
                 text="Website",
                 command=self._open_website,
-                fg_color=PRIMARY_COLOR,
-                text_color="white",
-                height=35
+                bg=PRIMARY_COLOR,
+                fg="white",
+                height=1,
+                width=10,
+                relief="raised",
+                borderwidth=2
             )
-            website_btn.grid(row=0, column=2, padx=SPACING_XS, pady=SPACING_SM)
+            website_btn.pack(side="left", padx=2, pady=SPACING_SM, fill="x", expand=True)
+            
+            # Test binding to see if button receives events
+            website_btn.bind("<Button-1>", lambda e: print("[DEBUG] Website button clicked via binding"))
         
         # Email button (if available)
         company_email = self.notification_data.get('company_email')
@@ -379,14 +424,16 @@ class BillNotificationDialog(ctk.CTkToplevel):
                 command=self._open_email,
                 fg_color=SECONDARY_COLOR,
                 text_color="white",
-                height=35
+                height=25,
+                width=80
             )
-            email_btn.grid(row=0, column=3, padx=SPACING_XS, pady=SPACING_SM)
+            email_btn.pack(side="left", padx=2, pady=SPACING_SM, fill="x", expand=True)
             
     def _mark_as_paid(self):
         """
         Mark the bill as paid by calling the on_mark_paid callback and closing the notification.
         """
+        print(f"[DEBUG] Mark Paid clicked for bill_id={self.notification_data.get('bill_id')}")
         try:
             if self.on_mark_paid:
                 self.on_mark_paid(self.notification_data.get('bill_id'))
@@ -398,6 +445,7 @@ class BillNotificationDialog(ctk.CTkToplevel):
         """
         Snooze the reminder for 1 hour by calling the on_snooze callback and closing the notification.
         """
+        print(f"[DEBUG] Snooze clicked for bill_id={self.notification_data.get('bill_id')}")
         try:
             if self.on_snooze:
                 self.on_snooze(self.notification_data.get('bill_id'), 3600)  # 1 hour in seconds
@@ -409,13 +457,17 @@ class BillNotificationDialog(ctk.CTkToplevel):
         """
         Open the bill's website in the default web browser.
         """
+        print(f"[DEBUG] Website button clicked for: {self.notification_data.get('web_page')}")
         try:
             web_page = self.notification_data.get('web_page')
             if web_page:
                 try:
                     webbrowser.open(web_page)
+                    print(f"[DEBUG] Opened website: {web_page}")
                 except Exception as e:
                     print(f"Error opening website: {e}")
+            else:
+                print("[DEBUG] No website URL available")
         except Exception as e:
             print(f"Error in _open_website: {e}")
                 
@@ -444,7 +496,9 @@ class BillNotificationDialog(ctk.CTkToplevel):
         """
         Close the notification dialog safely, canceling any pending timers.
         """
+        print("[DEBUG] Close notification called")
         if self._destroyed:
+            print("[DEBUG] Already destroyed, ignoring close")
             return
             
         self._destroyed = True
@@ -457,9 +511,17 @@ class BillNotificationDialog(ctk.CTkToplevel):
         
         try:
             if self.winfo_exists():
-                self._fade_out_and_destroy()
-        except:
-            pass
+                print("[DEBUG] Destroying notification directly")
+                self.destroy()
+            else:
+                print("[DEBUG] Window no longer exists")
+        except Exception as e:
+            print(f"[DEBUG] Error during close: {e}")
+            # Force destroy if fade fails
+            try:
+                self.destroy()
+            except:
+                pass
         
     def _auto_close(self):
         """
@@ -518,36 +580,30 @@ class NotificationManager:
                         except:
                             pass
                             
-                # Create new notification with a small delay to prevent interference
-                def create_notification():
-                    try:
-                        notification = BillNotificationDialog(
-                            notification_data, 
-                            on_mark_paid=on_mark_paid, 
-                            on_snooze=on_snooze
-                        )
-                        
-                        # Add to active notifications
-                        self.active_notifications.append(notification)
-                        
-                        # Remove from active list when closed
-                        def on_close():
-                            with self._lock:
-                                try:
-                                    if notification in self.active_notifications:
-                                        self.active_notifications.remove(notification)
-                                except:
-                                    pass
-                                
-                        notification.protocol("WM_DELETE_WINDOW", on_close)
-                        
-                    except Exception as e:
-                        print(f"Error creating notification: {e}")
-                
-                # Schedule notification creation with a small delay
-                import threading
-                timer = threading.Timer(0.5, create_notification)
-                timer.start()
+                # Create new notification directly (no threading delay)
+                try:
+                    notification = BillNotificationDialog(
+                        notification_data, 
+                        on_mark_paid=on_mark_paid, 
+                        on_snooze=on_snooze
+                    )
+                    
+                    # Add to active notifications
+                    self.active_notifications.append(notification)
+                    
+                    # Remove from active list when closed
+                    def on_close():
+                        with self._lock:
+                            try:
+                                if notification in self.active_notifications:
+                                    self.active_notifications.remove(notification)
+                            except:
+                                pass
+                            
+                    notification.protocol("WM_DELETE_WINDOW", on_close)
+                    
+                except Exception as e:
+                    print(f"Error creating notification: {e}")
                 
             except Exception as e:
                 print(f"Error showing notification: {e}")
