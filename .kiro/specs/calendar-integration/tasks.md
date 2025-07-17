@@ -21,7 +21,7 @@
   - Write unit tests for data models and interface definitions
   - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
-- [ ] 2. Implement OAuth authentication system
+- [x] 2. Implement OAuth authentication system
   - [x] 2.1 Create OAuth manager with provider-agnostic authentication flow
     - Implement OAuthManager class with methods for initiating auth flow, handling callbacks, and token refresh
     - Create OAuth configuration storage for different providers (client IDs, secrets, scopes, endpoints)
@@ -38,7 +38,7 @@
     - Write integration tests for Google Calendar authentication
     - _Requirements: 1.1, 1.2, 1.3_
 
-  - [ ] 2.3 Implement Microsoft Outlook OAuth integration
+  - [x] 2.3 Implement Microsoft Outlook OAuth integration
     - Create OutlookCalendarProvider class implementing CalendarProvider interface
     - Configure Microsoft Graph API OAuth 2.0 flow with calendar permissions
     - Implement Outlook-specific authentication methods and token handling

@@ -6,7 +6,9 @@ for different calendar services.
 """
 
 from .google import GoogleCalendarProvider
+from .outlook import OutlookCalendarProvider
 
 __all__ = [
-    'GoogleCalendarProvider'
+    'GoogleCalendarProvider',
+    'OutlookCalendarProvider'
 ]
