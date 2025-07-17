@@ -8,6 +8,8 @@ such as Google Calendar, Microsoft Outlook, and Apple Calendar.
 from .models import CalendarEvent, SyncOperation, SyncSettings, Reminder, EventTemplate
 from .interfaces import CalendarProvider, AuthResult, ConnectionResult, EventResult, DateRange
 from .exceptions import CalendarError, AuthError, SyncError, ValidationError, ConnectionError, RateLimitError, ConflictError
+from .oauth import OAuthManager, OAuthConfig, CredentialStorage
+from .providers import GoogleCalendarProvider
 
 __all__ = [
     'CalendarEvent',
@@ -26,5 +28,9 @@ __all__ = [
     'ValidationError',
     'ConnectionError',
     'RateLimitError',
-    'ConflictError'
+    'ConflictError',
+    'OAuthManager',
+    'OAuthConfig',
+    'CredentialStorage',
+    'GoogleCalendarProvider'
 ]

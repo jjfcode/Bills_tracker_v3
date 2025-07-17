@@ -22,7 +22,7 @@
   - _Requirements: 1.1, 1.2, 1.3, 1.4_
 
 - [ ] 2. Implement OAuth authentication system
-  - [ ] 2.1 Create OAuth manager with provider-agnostic authentication flow
+  - [x] 2.1 Create OAuth manager with provider-agnostic authentication flow
     - Implement OAuthManager class with methods for initiating auth flow, handling callbacks, and token refresh
     - Create OAuth configuration storage for different providers (client IDs, secrets, scopes, endpoints)
     - Implement secure credential storage using AES-256 encryption with user-specific keys
@@ -30,7 +30,7 @@
     - Write unit tests for OAuth flow components
     - _Requirements: 1.2, 1.3, 1.4_
 
-  - [ ] 2.2 Implement Google Calendar OAuth integration
+  - [x] 2.2 Implement Google Calendar OAuth integration
     - Create GoogleCalendarProvider class implementing CalendarProvider interface
     - Configure Google Calendar API OAuth 2.0 flow with offline access scope
     - Implement Google-specific authentication methods and token handling
